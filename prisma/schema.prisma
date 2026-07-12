@@ -16,7 +16,11 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  // SQLite for a zero-setup, self-contained submission (no Docker/Postgres
+  // needed) — per the README's "SQLite supported as a zero-setup fallback".
+  // All models are Float/String (no Decimal/native enums), so this is a drop-in
+  // swap for postgresql if a hosted DB is preferred.
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
