@@ -319,6 +319,22 @@ The application strictly adheres to a **minimalist, ops-intelligence aesthetic**
 
 <br />
 
+## 9. Security & Compliance (SOC 1/2 & GDPR)
+
+TransitOps is engineered with security and data privacy by design to streamline compliance audits for SOC 1, SOC 2, and GDPR requirements.
+
+- **SOC 2 (Security & Confidentiality)**: Enforces stateless authentication using **HttpOnly JWTs** and robust **bcrypt password hashing** (12 salt rounds). Eliminates Cross-Site Scripting (XSS) risks related to session tokens. Comprehensive Role-Based Access Control (RBAC) satisfies logical access control requirements.
+- **SOC 1 (Data Integrity)**: The state-machine-driven dispatch architecture guarantees valid transitions, producing immutable operational records essential for transparent financial reporting (ROI & Expense metrics).
+- **GDPR (Data Privacy)**: Incorporates strict data minimization principles by design. TLS/HTTPS enforcement for in-transit data and bcrypt for at-rest password data satisfy Article 32 (Security of Processing). 
+
+> For detailed technical mappings, see the `SOC_GDPR_COMPLIANCE.md` artifact included in the source code.
+
+<br />
+
+---
+
+<br />
+
 <div align="center">
   <br />
   <strong>Built by OneReign</strong>
