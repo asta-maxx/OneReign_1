@@ -21,7 +21,7 @@ function normalizeExpenseType(value: unknown): ExpenseType | null {
  * POST /api/expenses
  * Record an expense against a vehicle.
  *
- * Body: { vehicleId: string, type: "toll"|"maintenance"|"other",
+ * Body: { vehicleId: string, type: "Toll"|"Maintenance"|"Other" (any casing),
  *         amount: number, date: string|number }
  * Validation: type in the allowed set, amount >= 0, date not in the future.
  */
