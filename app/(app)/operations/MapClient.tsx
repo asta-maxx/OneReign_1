@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef, Fragment } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import { useState, Fragment } from "react";
+import { Map, Overlay, GeoJson } from "pigeon-maps";
+import { FeatureCollection } from "geojson";
 
 // We'll use a pure grayscale map tile to match Nike aesthetic
-const TILE_URL = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+const mapTilerProvider = (x: number, y: number, z: number, dpr?: number) => {
+  return `https://cartodb-basemaps-a.global.ssl.fastly.net/light_all/${z}/${x}/${y}${dpr && dpr >= 2 ? '@2x' : ''}.png`;
+};
 
 // Depot Coordinates (NYC area as an example)
 const HUBS = [
@@ -33,7 +34,7 @@ type Vehicle = {
 // Colors mapping to Nike's Semantic tokens
 const STATUS_COLOR: Record<string, string> = {
   Available: "#1eaa52", // success-bright
-  "On Trip": "#111111", // ink (was info, but let's use ink for moving)
+  "On Trip": "#111111", // ink
   "In Shop": "#d30005", // sale
   Retired: "#707072",   // mute
 };
@@ -53,53 +54,6 @@ function getOffsetLatLn(lat: number, lng: number, index: number) {
   return { lat: lat + offset[0], lng: lng + offset[1] };
 }
 
-// Create custom div icons
-function createMarkerIcon(color: string, reg: string, isSelected: boolean) {
-  return L.divIcon({
-    className: "custom-div-icon",
-    html: `
-      <div style="
-        background-color: ${color};
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        border: 2px solid white;
-        box-shadow: ${isSelected ? `0 0 0 4px ${color}40` : 'none'};
-      "></div>
-      <div style="
-        margin-top: 4px;
-        font-size: 10px;
-        font-weight: 600;
-        color: #111111;
-        text-shadow: 1px 1px 0px white, -1px -1px 0px white, 1px -1px 0px white, -1px 1px 0px white;
-        transform: translateX(-50%);
-        margin-left: 6px;
-      ">
-        ${reg}
-      </div>
-    `,
-    iconSize: [12, 12],
-    iconAnchor: [6, 6],
-  });
-}
-
-function createHubIcon() {
-  return L.divIcon({
-    className: "hub-icon",
-    html: `
-      <div style="
-        background-color: #111111;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        border: 2px solid white;
-      "></div>
-    `,
-    iconSize: [16, 16],
-    iconAnchor: [8, 8],
-  });
-}
-
 export default function MapClient({ 
   vehicles, 
   selected, 
@@ -112,76 +66,137 @@ export default function MapClient({
   const parkedCount: Record<string, number> = {};
 
   return (
-    <MapContainer 
-      center={[40.7128, -73.95]} 
-      zoom={11} 
-      style={{ height: "100%", width: "100%", minHeight: "500px", background: "#f5f5f5" }}
-      zoomControl={false}
-    >
-      <TileLayer url={TILE_URL} attribution="&copy; OpenStreetMap &copy; CARTO" />
+    <div style={{ height: "100%", width: "100%", minHeight: "500px", background: "#f5f5f5" }}>
+      <Map 
+        provider={mapTilerProvider} 
+        defaultCenter={[40.7128, -73.95]} 
+        defaultZoom={11}
+        mouseEvents={true}
+        touchEvents={true}
+      >
+        {/* Render Hubs */}
+        {HUBS.map((hub) => (
+          <Overlay key={hub.id} anchor={[hub.lat, hub.lng]} offset={[8, 8]}>
+            <div 
+              style={{
+                backgroundColor: "#111111",
+                width: 16,
+                height: 16,
+                borderRadius: "50%",
+                border: "2px solid white",
+                cursor: "pointer"
+              }} 
+              title={hub.label}
+            />
+          </Overlay>
+        ))}
 
-      {/* Render Hubs */}
-      {HUBS.map((hub) => (
-        <Marker 
-          key={hub.id} 
-          position={[hub.lat, hub.lng]} 
-          icon={createHubIcon()}
-        >
-          <Popup>
-            <div className="font-display uppercase text-lg">{hub.label}</div>
-          </Popup>
-        </Marker>
-      ))}
+        {/* Render Vehicles - Flattened so Pigeon Maps can inject mapState to GeoJson/Overlay */}
+        {vehicles.flatMap((v) => {
+          const h = hash(v.id);
+          const color = STATUS_COLOR[v.status] || "#707072";
+          const isSelected = selected?.id === v.id;
 
-      {/* Render Vehicles */}
-      {vehicles.map((v) => {
-        const h = hash(v.id);
-        const color = STATUS_COLOR[v.status] || "#707072";
-        const isSelected = selected?.id === v.id;
+          if (v.status === "On Trip") {
+            const origin = DEPOT_IDS[h % DEPOT_IDS.length];
+            const dest = DEPOT_IDS[(h + 1 + (h % 2)) % DEPOT_IDS.length];
+            const o = HUB[origin], d = HUB[dest];
+            const midLat = (o.lat + d.lat) / 2;
+            const midLng = (o.lng + d.lng) / 2;
+            
+            const lineGeoJson: FeatureCollection = {
+              type: "FeatureCollection",
+              features: [
+                {
+                  type: "Feature",
+                  geometry: {
+                    type: "LineString",
+                    coordinates: [[o.lng, o.lat], [d.lng, d.lat]] // geojson is [lng, lat]
+                  },
+                  properties: {}
+                }
+              ]
+            };
 
-        if (v.status === "On Trip") {
-          // Animate logic: for simplicity in Leaflet without external plugins, 
-          // we'll just draw a polyline between origin and dest, and put the marker in the middle.
-          const origin = DEPOT_IDS[h % DEPOT_IDS.length];
-          const dest = DEPOT_IDS[(h + 1 + (h % 2)) % DEPOT_IDS.length];
-          const o = HUB[origin], d = HUB[dest];
-          
-          // Polyline
-          return (
-            <Fragment key={v.id}>
-              <Polyline 
-                positions={[[o.lat, o.lng], [d.lat, d.lng]]} 
-                color={color} 
-                weight={2} 
-                dashArray="4 6"
-                opacity={0.5}
-              />
-              <Marker 
-                position={[(o.lat + d.lat)/2, (o.lng + d.lng)/2]} 
-                icon={createMarkerIcon(color, v.regNumber, isSelected)}
-                eventHandlers={{
-                  click: () => setSelected(v)
+            return [
+              <GeoJson 
+                key={`${v.id}-line`}
+                data={lineGeoJson}
+                styleCallback={() => ({ 
+                  stroke: color, 
+                  strokeWidth: 2, 
+                  strokeDasharray: "4 6", 
+                  opacity: 0.5,
+                  fill: "none"
+                })}
+              />,
+              <Overlay key={`${v.id}-overlay`} anchor={[midLat, midLng]} offset={[6, 6]}>
+                <div 
+                  onClick={() => setSelected(v)}
+                  style={{
+                    backgroundColor: color,
+                    width: 12,
+                    height: 12,
+                    borderRadius: "50%",
+                    border: "2px solid white",
+                    boxShadow: isSelected ? `0 0 0 4px ${color}40` : 'none',
+                    cursor: "pointer",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "flex-end"
+                  }}
+                >
+                  <div style={{
+                    marginTop: 14,
+                    fontSize: 10,
+                    fontWeight: 600,
+                    color: "#111111",
+                    textShadow: "1px 1px 0px white, -1px -1px 0px white, 1px -1px 0px white, -1px 1px 0px white",
+                    whiteSpace: "nowrap"
+                  }}>
+                    {v.regNumber}
+                  </div>
+                </div>
+              </Overlay>
+            ];
+          }
+
+          const hubId = v.status === "In Shop" ? "garage" : v.status === "Retired" ? "retired" : DEPOT_IDS[h % DEPOT_IDS.length];
+          const i = parkedCount[hubId] = (parkedCount[hubId] ?? 0) + 1;
+          const pos = getOffsetLatLn(HUB[hubId].lat, HUB[hubId].lng, i - 1);
+
+          return [
+            <Overlay key={`${v.id}-overlay`} anchor={[pos.lat, pos.lng]} offset={[6, 6]}>
+              <div 
+                onClick={() => setSelected(v)}
+                style={{
+                  backgroundColor: color,
+                  width: 12,
+                  height: 12,
+                  borderRadius: "50%",
+                  border: "2px solid white",
+                  boxShadow: isSelected ? `0 0 0 4px ${color}40` : 'none',
+                  cursor: "pointer",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "flex-end"
                 }}
-              />
-            </Fragment>
-          );
-        }
-
-        const hubId = v.status === "In Shop" ? "garage" : v.status === "Retired" ? "retired" : DEPOT_IDS[h % DEPOT_IDS.length];
-        const i = parkedCount[hubId] = (parkedCount[hubId] ?? 0) + 1;
-        const pos = getOffsetLatLn(HUB[hubId].lat, HUB[hubId].lng, i - 1);
-
-        return (
-          <Marker 
-            key={v.id} 
-            position={[pos.lat, pos.lng]} 
-            icon={createMarkerIcon(color, v.regNumber, isSelected)}
-            eventHandlers={{
-              click: () => setSelected(v)
-            }}
-          />
-        );
-      })}
-    </MapContainer>
+              >
+                <div style={{
+                  marginTop: 14,
+                  fontSize: 10,
+                  fontWeight: 600,
+                  color: "#111111",
+                  textShadow: "1px 1px 0px white, -1px -1px 0px white, 1px -1px 0px white, -1px 1px 0px white",
+                  whiteSpace: "nowrap"
+                }}>
+                  {v.regNumber}
+                </div>
+              </div>
+            </Overlay>
+          ];
+        })}
+      </Map>
+    </div>
   );
 }
