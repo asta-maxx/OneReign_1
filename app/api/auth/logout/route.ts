@@ -1,8 +1,21 @@
 import { NextResponse } from "next/server";
 
-// Placeholder to match app/api/auth/signup — auth owner to implement.
+import { jsonError } from "@/lib/apiHelpers";
+import { clearAuthCookie } from "@/lib/auth/cookies";
+
+/**
+ * POST /api/auth/logout
+ */
 export async function POST() {
-  return NextResponse.json({
-    message: "Logout endpoint under development",
-  });
+  try {
+    clearAuthCookie();
+
+    return NextResponse.json({
+      success: true,
+    });
+  } catch (err: unknown) {
+    console.error("POST /api/auth/logout failed", err);
+
+    return jsonError("Internal server error", 500);
+  }
 }
