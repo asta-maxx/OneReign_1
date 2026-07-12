@@ -19,8 +19,9 @@ export async function PATCH(
   if (!id) return jsonError("maintenance id is required", 400);
 
   try {
-    // Close the record inside a transaction. We re-read within the tx and reject
-    // double-closes so closedAt is only ever stamped once.
+    // Close the record AND revert the vehicle to "Available" in ONE transaction,
+    // so the record's Closed state and the status flip commit together. We re-read
+    // within the tx and reject double-closes so closedAt is stamped only once.
     const log = await prisma.$transaction(async (tx) => {
       const existing = await tx.maintenanceLog.findUnique({
         where: { id },
@@ -31,26 +32,25 @@ export async function PATCH(
         throw new HttpError("Maintenance record is already closed", 409);
       }
 
-      return tx.maintenanceLog.update({
+      const updated = await tx.maintenanceLog.update({
         where: { id },
         data: { status: "Closed", closedAt: new Date() },
       });
-    });
 
-    // Decide whether to revert the vehicle to "Available". We read the CURRENT
-    // vehicle status and skip the transition if it's "Retired".
-    //
-    // NOTE: this check-then-set is best-effort. The definitive "never override
-    // Retired" rule should also be enforced inside updateVehicleStatus() so it
-    // holds even if the vehicle is retired concurrently between this read and the
-    // status write. See docs/operational-module.md → "Concurrency".
-    const vehicle = await prisma.vehicle.findUnique({
-      where: { id: log.vehicleId },
-      select: { status: true },
+      // Revert to "Available" unless the vehicle is Retired — a vehicle can be
+      // retired while in the shop, and Retired must never be overridden. We skip
+      // the call when Retired rather than let the engine throw (which would abort
+      // the close). The engine also guards Retired atomically as a backstop.
+      const vehicle = await tx.vehicle.findUnique({
+        where: { id: existing.vehicleId },
+        select: { status: true },
+      });
+      if (vehicle && vehicle.status !== "Retired") {
+        await updateVehicleStatus(existing.vehicleId, "Available", { tx });
+      }
+
+      return updated;
     });
-    if (vehicle && vehicle.status !== "Retired") {
-      await updateVehicleStatus(log.vehicleId, "Available");
-    }
 
     return NextResponse.json(log);
   } catch (err) {

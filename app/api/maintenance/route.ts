@@ -53,14 +53,12 @@ export async function POST(req: NextRequest) {
     // against a consistent snapshot and the insert can't interleave with another
     // maintenance-create for the same vehicle.
     //
-    // ATOMICITY CAVEAT: the vehicle-status flip lives in updateVehicleStatus()
-    // and runs AFTER this transaction commits, because the shared signature is
-    // updateVehicleStatus(vehicleId, newStatus) with no tx parameter. That leaves
-    // a small window where the maintenance record exists but the vehicle is not
-    // yet "In Shop", and the check-then-set is not race-proof against a
-    // concurrent trip dispatch. The authoritative guard must therefore live
-    // inside updateVehicleStatus (atomic conditional UPDATE / row lock). See
-    // docs/operational-module.md → "Concurrency".
+    // The maintenance-record write AND the "In Shop" status flip run in ONE
+    // transaction: updateVehicleStatus() accepts the tx client, so either both
+    // commit or neither does — no window where the record exists but the vehicle
+    // isn't yet "In Shop". The status write itself is an atomic conditional
+    // UPDATE inside the engine, so it's also race-proof against a concurrent trip
+    // dispatch. See docs/operational-module.md → "Concurrency".
     const log = await prisma.$transaction(async (tx) => {
       const vehicle = await tx.vehicle.findUnique({
         where: { id: vehicleId },
@@ -84,13 +82,15 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      return tx.maintenanceLog.create({
+      const created = await tx.maintenanceLog.create({
         data: { vehicleId, description, status: "Active" },
       });
-    });
 
-    // Route the status change through the centralised engine.
-    await updateVehicleStatus(vehicleId, "In Shop");
+      // Route the status change through the centralised engine, in-transaction.
+      await updateVehicleStatus(vehicleId, "In Shop", { tx });
+
+      return created;
+    });
 
     return NextResponse.json(log, { status: 201 });
   } catch (err) {
