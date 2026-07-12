@@ -2,10 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isNumberAtLeast, jsonError, parseNonFutureDate } from "@/lib/apiHelpers";
 
-// Allowed expense types. Must match the Prisma enum the teammate defines for
-// Expense.type — reconcile if they name/case them differently.
-const EXPENSE_TYPES = ["toll", "maintenance", "other"] as const;
+// Allowed expense types. Canonical casing matches the frontend contract in
+// lib/types.ts ("Toll" | "Maintenance" | "Other"); getOperationalCost filters on
+// "Maintenance" so these MUST stay in sync.
+const EXPENSE_TYPES = ["Toll", "Maintenance", "Other"] as const;
 type ExpenseType = (typeof EXPENSE_TYPES)[number];
+
+// Accept any casing from the client, store the canonical capitalised value.
+// Returns null when the input isn't one of the allowed types.
+function normalizeExpenseType(value: unknown): ExpenseType | null {
+  if (typeof value !== "string") return null;
+  return (
+    EXPENSE_TYPES.find((t) => t.toLowerCase() === value.toLowerCase()) ?? null
+  );
+}
 
 /**
  * POST /api/expenses
@@ -33,7 +43,8 @@ export async function POST(req: NextRequest) {
   if (typeof vehicleId !== "string" || vehicleId.length === 0) {
     return jsonError("vehicleId is required", 400);
   }
-  if (!EXPENSE_TYPES.includes(type as ExpenseType)) {
+  const normalizedType = normalizeExpenseType(type);
+  if (!normalizedType) {
     return jsonError(
       `type must be one of: ${EXPENSE_TYPES.join(", ")}`,
       400
@@ -54,7 +65,7 @@ export async function POST(req: NextRequest) {
   if (!vehicle) return jsonError("Vehicle not found", 404);
 
   const expense = await prisma.expense.create({
-    data: { vehicleId, type: type as ExpenseType, amount, date: parsedDate },
+    data: { vehicleId, type: normalizedType, amount, date: parsedDate },
   });
   return NextResponse.json(expense, { status: 201 });
 }

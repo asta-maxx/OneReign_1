@@ -1,0 +1,18 @@
+# Local self-hosted PostgreSQL for TransitOps (no managed DB, per project constraint).
+# Usage: docker compose up -d, then `npx prisma migrate dev` and `npx prisma db seed`.
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: transitops-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: transitops
+      POSTGRES_PASSWORD: transitops
+      POSTGRES_DB: transitops
+    ports:
+      - "5432:5432"
+    volumes:
+      - transitops-pgdata:/var/lib/postgresql/data
+
+volumes:
+  transitops-pgdata:

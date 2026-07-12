@@ -1,0 +1,112 @@
+// TransitOps data model.
+//
+// Field names are aligned with the frontend contract in `lib/types.ts` (the UI
+// and its API client are the source of truth for shapes), so the same objects
+// flow from DB -> API -> UI without translation.
+//
+// Status/type columns are modelled as `String` (not Prisma enums) on purpose:
+// the app's status values contain spaces ("On Trip", "In Shop") which Prisma
+// enum identifiers cannot hold without @map, and the whole codebase already
+// compares these as plain string literals. Allowed values are documented next to
+// each field. Money is `Float` to match the `number` types the UI expects and to
+// avoid Prisma Decimal serialising as a string across the API boundary.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Vehicle {
+  id              String   @id @default(cuid())
+  regNumber       String   @unique
+  name            String
+  type            String
+  maxLoadCapacity Int
+  odometer        Int
+  acquisitionCost Float // used by the ROI report alongside operational cost
+  status          String   @default("Available") // "Available" | "On Trip" | "In Shop" | "Retired"
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  trips           Trip[]
+  maintenanceLogs MaintenanceLog[]
+  fuelLogs        FuelLog[]
+  expenses        Expense[]
+
+  @@index([status])
+}
+
+model Driver {
+  id             String   @id @default(cuid())
+  name           String
+  licenseNumber  String   @unique
+  licenseCategory String
+  licenseExpiry  DateTime
+  safetyScore    Float    @default(100)
+  status         String   @default("Available") // "Available" | "On Trip" | "Off Duty" | "Suspended"
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  trips          Trip[]
+}
+
+model Trip {
+  id          String    @id @default(cuid())
+  vehicleId   String
+  driverId    String
+  status      String    @default("Draft") // "Draft" | "Dispatched" | "Completed" | "Cancelled"
+  distance    Float     @default(0) // distance for this trip (used for fuel efficiency once Completed)
+  cargoWeight Float?
+  region      String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+
+  vehicle     Vehicle   @relation(fields: [vehicleId], references: [id])
+  driver      Driver    @relation(fields: [driverId], references: [id])
+
+  @@index([vehicleId, status])
+}
+
+model MaintenanceLog {
+  id          String    @id @default(cuid())
+  vehicleId   String
+  description String
+  status      String    @default("Active") // "Active" | "Closed"
+  closedAt    DateTime?
+  createdAt   DateTime  @default(now())
+
+  vehicle     Vehicle   @relation(fields: [vehicleId], references: [id])
+
+  @@index([vehicleId, status])
+}
+
+model FuelLog {
+  id        String   @id @default(cuid())
+  vehicleId String
+  liters    Float
+  cost      Float
+  date      DateTime
+  createdAt DateTime @default(now())
+
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
+
+  @@index([vehicleId])
+}
+
+model Expense {
+  id        String   @id @default(cuid())
+  vehicleId String
+  type      String // "Toll" | "Maintenance" | "Other" (matches lib/types.ts)
+  amount    Float
+  date      DateTime
+  createdAt DateTime @default(now())
+
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
+
+  @@index([vehicleId, type])
+}

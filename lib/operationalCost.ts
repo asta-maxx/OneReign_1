@@ -8,20 +8,20 @@ import { prisma } from "@/lib/prisma";
  *
  * SCHEMA ASSUMPTIONS (to reconcile with the teammate's Prisma schema — see
  * docs/operational-module.md):
- *  - FuelLog:  { vehicleId, liters: Float(>0), cost: money, date: DateTime }
- *  - Expense:  { vehicleId, type: "toll"|"maintenance"|"other", amount: money, date }
+ *  - FuelLog:  { vehicleId, liters: Float(>0), cost: Float, date: DateTime }
+ *  - Expense:  { vehicleId, type: "Toll"|"Maintenance"|"Other", amount: Float, date }
  *  - Trip:     { vehicleId, status: "Completed" (among others), distance: Float }
- *  - `money` columns may be Prisma Decimal; `toNumber` below handles both Decimal
- *    and plain number so summation stays correct regardless.
+ *
+ * These match the Prisma schema (prisma/schema.prisma) and the frontend contract
+ * (lib/types.ts). Money is Float there, but `toNumber` also tolerates Decimal so
+ * this stays correct if the columns are ever tightened to Decimal.
  */
 
-// Prisma `_sum` returns `null` when there are no matching rows, and may return a
-// Prisma.Decimal for Decimal columns. Normalise to a plain number, treating the
-// empty/no-rows case as 0.
+// Prisma `_sum` returns `null` when there are no matching rows. Normalise to a
+// plain number, treating the empty/no-rows case as 0. Also tolerates Decimal
+// (which implements valueOf()/toString()) in case money columns are tightened.
 function toNumber(value: unknown): number {
   if (value === null || value === undefined) return 0;
-  // Prisma.Decimal implements valueOf()/toString(), so Number() is safe for both
-  // Decimal instances and plain JS numbers.
   return Number(value);
 }
 
@@ -37,7 +37,7 @@ export interface OperationalCost {
  *
  *   fuelCost        = Σ over all FuelLog rows for this vehicle of `cost`
  *   maintenanceCost = Σ over all Expense rows for this vehicle where
- *                     `type = "maintenance"` of `amount`
+ *                     `type = "Maintenance"` of `amount`
  *   totalCost       = fuelCost + maintenanceCost
  *
  * NOTE on maintenance cost source of truth: maintenance cost is taken ONLY from
@@ -56,7 +56,7 @@ export async function getOperationalCost(
       _sum: { cost: true },
     }),
     prisma.expense.aggregate({
-      where: { vehicleId, type: "maintenance" },
+      where: { vehicleId, type: "Maintenance" },
       _sum: { amount: true },
     }),
   ]);
