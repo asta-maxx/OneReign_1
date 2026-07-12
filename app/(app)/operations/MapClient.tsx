@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, Fragment } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -148,7 +148,7 @@ export default function MapClient({
           
           // Polyline
           return (
-            <div key={v.id}>
+            <Fragment key={v.id}>
               <Polyline 
                 positions={[[o.lat, o.lng], [d.lat, d.lng]]} 
                 color={color} 
@@ -163,7 +163,7 @@ export default function MapClient({
                   click: () => setSelected(v)
                 }}
               />
-            </div>
+            </Fragment>
           );
         }
 
