@@ -13,14 +13,20 @@ client `lib/api/maintenanceClient.ts` (which flips from mock to these routes whe
 | `prisma/seed.ts` | Demo fleet mirroring the UI mock data. |
 | `lib/prisma.ts` | Shared `PrismaClient` singleton. |
 | `lib/vehicleStatus.ts` | **Centralised** `updateVehicleStatus` engine — the only writer of `Vehicle.status`. |
-| `lib/operationalCost.ts` | `getOperationalCost()` + `getFuelEfficiency()` (feeds ROI). |
+| `lib/operationalCost.ts` | `getOperationalCost()` + `getFuelEfficiency()`. |
+| `lib/roi.ts` | `getVehicleROI()` (revenue vs. cost vs. capital). |
+| `lib/calc.ts` | Pure, DB-free formula helpers (single source of truth). |
+| `lib/calc.test.ts` | Vitest unit tests for the formulas. |
 | `lib/apiHelpers.ts` | Shared JSON-error + validation helpers. |
 | `app/api/vehicles/route.ts` | `GET` list (`?status=`, `?type=`), `POST` create. |
+| `app/api/vehicles/[id]/retire/route.ts` | `POST` retire (via status engine). |
+| `app/api/vehicles/[id]/operational-cost/route.ts` | `GET` cost + efficiency. |
+| `app/api/vehicles/[id]/roi/route.ts` | `GET` ROI. |
+| `app/api/analytics/route.ts` | `GET` fleet-wide KPIs. |
 | `app/api/maintenance/route.ts` | `POST` create, `GET ?vehicleId=` list. |
 | `app/api/maintenance/[id]/close/route.ts` | `PATCH` close. |
 | `app/api/fuel-logs/route.ts` | `POST` create, `GET ?vehicleId=` list. |
 | `app/api/expenses/route.ts` | `POST` create, `GET ?vehicleId=` list. |
-| `app/api/vehicles/[id]/operational-cost/route.ts` | `GET` cost + efficiency. |
 
 ## Setup
 
@@ -30,9 +36,10 @@ cp .env.example .env
 npx prisma migrate dev      # create tables
 npx prisma db seed          # load demo fleet
 npm run dev
+npm test                    # run formula unit tests (vitest)
 ```
 
-## Cost / efficiency formulas (verify quickly)
+## Cost / efficiency / ROI formulas (verify quickly)
 
 ```
 fuelCost        = Σ FuelLog.cost                       (all fuel logs for vehicle)
@@ -42,7 +49,15 @@ totalCost       = fuelCost + maintenanceCost
 fuelEfficiency  = totalDistance / totalLitersUsed      (null when litres = 0)
 totalDistance   = Σ Trip.distance WHERE status="Completed"
 totalLitersUsed = Σ FuelLog.liters
+
+totalRevenue    = Σ Trip.revenue WHERE status="Completed"
+netProfit       = totalRevenue - totalCost
+roi             = netProfit / Vehicle.acquisitionCost  (null when acquisitionCost = 0)
 ```
+
+**ROI revenue assumption (flag for the team):** ROI uses `Trip.revenue` as the
+earnings source and measures return against the vehicle's `acquisitionCost`. If
+revenue is modelled differently, change `totalRevenue` in `lib/roi.ts`.
 
 ## Design decisions & guarantees
 
