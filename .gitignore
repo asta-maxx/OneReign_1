@@ -34,3 +34,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Env and Secrets
+.env
+.env.*
+
+# AI/Editor/OS files
+.claude
+.cursor
+.vscode
+*.swp
+*.swo
