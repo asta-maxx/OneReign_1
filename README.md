@@ -69,22 +69,19 @@ The system is architected around a **state-machine-driven core** where vehicles 
 
 ## Modules
 
-### <img src="https://img.shields.io/badge/-Authentication-0d1117?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMGFlYzAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTIgMjJzOC00IDgtMTBWNWwtOC0zLTggM3Y3YzAgNiA4IDEwIDggMTAiLz48L3N2Zz4=" />  Authentication
-
+### Authentication
 - Signup with input validation (email format, password strength, name length)
 - bcrypt password hashing (12 salt rounds)
 - JWT token generation with HttpOnly cookie transport
 - Foundation for login/logout session lifecycle
 
-### <img src="https://img.shields.io/badge/-Dashboard_&_Analytics-0d1117?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMGFlYzAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSIzIiB5PSIzIiB3aWR0aD0iNyIgaGVpZ2h0PSI3Ii8+PHJlY3QgeD0iMTQiIHk9IjMiIHdpZHRoPSI3IiBoZWlnaHQ9IjciLz48cmVjdCB4PSIxNCIgeT0iMTQiIHdpZHRoPSI3IiBoZWlnaHQ9IjciLz48cmVjdCB4PSIzIiB5PSIxNCIgd2lkdGg9IjciIGhlaWdodD0iNyIvPjwvc3ZnPg==" />  Dashboard & Analytics
-
+### Dashboard & Analytics
 - **KPI Grid** — Real-time fleet overview: Active Vehicles, Available, In Maintenance, Active Trips, Pending Trips, Drivers On Duty, Fleet Utilization %
 - **Filter Bar** — Dynamic filtering by status, region, vehicle type with URL state sync
 - **Utilization Chart** — Recharts Area chart with gradient fill, custom dark-theme tooltips
 - **Skeleton Loaders** — Layout-matching loading states (no spinners)
 
-### <img src="https://img.shields.io/badge/-Reports_Hub-0d1117?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMGFlYzAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48bGluZSB4MT0iMTgiIHkxPSIyMCIgeDI9IjE4IiB5Mj0iMTAiLz48bGluZSB4MT0iMTIiIHkxPSIyMCIgeDI9IjEyIiB5Mj0iNCIvPjxsaW5lIHgxPSI2IiB5MT0iMjAiIHgyPSI2IiB5Mj0iMTQiLz48L3N2Zz4=" />  Reports Hub (Tabbed Interface)
-
+### Reports Hub (Tabbed Interface)
 | Report | Visualization | Key Metric |
 |--------|--------------|------------|
 | **Fuel Efficiency** | Bar chart + sortable table | km/l per vehicle with color-coded thresholds |
@@ -94,34 +91,29 @@ The system is architected around a **state-machine-driven core** where vehicles 
 
 All reports include **client-side CSV export** — one-click download of the currently filtered dataset.
 
-### <img src="https://img.shields.io/badge/-Maintenance_Management-0d1117?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMGFlYzAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhMSAxIDAgMCAwIDAgMS40bDEuNiAxLjZhMSAxIDAgMCAwIDEuNCAwbDMuNy0zLjdhNiA2IDAgMCAxLTcuNCA3LjRsLTYgNmExLjUgMS41IDAgMCAxLTIuMS0yLjFsNi02YTYgNiAwIDAgMSA3LjQtNy40eiIvPjwvc3ZnPg==" />  Maintenance Management
-
+### Maintenance Management
 - Create, track, and close maintenance logs per vehicle
 - Vehicle status automatically transitions to `In Shop` on active maintenance
 - Closing a maintenance record restores vehicle to `Available`
 
-### <img src="https://img.shields.io/badge/-Fuel_Logs-0d1117?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMGFlYzAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMyAyMnYtN2wxLTMgNC0yaDZsNCAyIDEgM3Y3Ii8+PHBhdGggZD0iTTEyIDJhNSA1IDAgMCAxIDUgNXYySDd2LTJhNSA1IDAgMCAxIDUtNXoiLz48L3N2Zz4=" />  Fuel Logs
-
+### Fuel Logs
 - Log fuel fill-ups with volume (liters), cost, and date
 - Per-vehicle fuel history tracking
 - Data feeds into the Fuel Efficiency report
 
-### <img src="https://img.shields.io/badge/-Expense_Tracking-0d1117?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMGFlYzAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48bGluZSB4MT0iMTIiIHkxPSIxIiB4Mj0iMTIiIHkyPSIyMyIvPjxwYXRoIGQ9Ik0xNyA1SDkuNWE0IDQgMCAwIDAgMCA4aDVhNCA0IDAgMCAxIDAgOEg2Ii8+PC9zdmc+" />  Expense Tracking
-
+### Expense Tracking
 - Categorized expenses: Toll, Maintenance, Other
 - Per-vehicle expense aggregation
 - Data feeds into the Operational Cost and ROI reports
 
-### <img src="https://img.shields.io/badge/-Vehicle_&_Driver_Lifecycle-0d1117?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMGFlYzAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMSAzaDEzbDIgNC01IDVIOHoiLz48cGF0aCBkPSJNMTAuNSAxMkgxN2w1IDUtMiA0SDYuNWwtMy40LTIuM0wxMC41IDEyeiIvPjwvc3ZnPg==" />  Vehicle & Driver Lifecycle
-
+### Vehicle & Driver Lifecycle
 - Full CRUD for vehicles and drivers
 - **State Machine Engine** (`lib/statusTransitions.ts`) — validates every status transition:
   - Vehicle: `Available → On Trip → Available`, `Available → In Shop → Available`, `* → Retired`
   - Driver: `Available → On Trip → Available`, `Available → Off Duty → Available`, `* → Suspended`
 - Atomic trip lifecycle: `Draft → Dispatched → Completed | Cancelled`
 
-### <img src="https://img.shields.io/badge/-Financial_Formulas_Engine-0d1117?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMGFlYzAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSI0IiB5PSIyIiB3aWR0aD0iMTYiIGhlaWdodD0iMjAiIHJ4PSIyIi8+PGxpbmUgeDE9IjgiIHkxPSI2IiB4Mj0iMTYiIHkyPSI2Ii8+PGxpbmUgeDE9IjgiIHkxPSIxMCIgeDI9IjE2IiB5Mj0iMTAiLz48bGluZSB4MT0iOCIgeTE9IjE0IiB4Mj0iMTIiIHkyPSIxNCIvPjwvc3ZnPg==" />  Financial Formulas Engine
-
+### Financial Formulas Engine
 - **Fuel Efficiency** — `distanceKm / totalLiters` per vehicle
 - **Operational Cost** — aggregated fuel + maintenance + expenses per vehicle per period
 - **ROI** — `(Revenue − OperationalCost) / AcquisitionCost × 100`
@@ -201,6 +193,8 @@ Open **http://localhost:3000** to view the application.
 │   │   ├── auth/               #   ├── signup, login, logout
 │   │   ├── analytics/          #   ├── Fleet KPIs & aggregations
 │   │   ├── vehicles/           #   ├── CRUD + retire + operational-cost + ROI
+│   │   ├── drivers/            #   ├── CRUD + available lookup
+│   │   ├── trips/              #   ├── CRUD + dispatch + complete + cancel
 │   │   ├── maintenance/        #   ├── Create, list, close
 │   │   ├── fuel-logs/          #   ├── Create, list
 │   │   └── expenses/           #   └── Create, list
@@ -222,6 +216,7 @@ Open **http://localhost:3000** to view the application.
 │   ├── auth/                   # JWT, bcrypt, validation utilities
 │   ├── statusTransitions.ts    # State machine for Vehicle/Driver
 │   ├── trip.ts                 # Trip lifecycle engine
+│   ├── driver.ts               # Driver CRUD operations
 │   ├── calc.ts                 # Financial formula library
 │   ├── calc.test.ts            # Formula unit tests
 │   └── prisma.ts               # Database client singleton
@@ -246,6 +241,6 @@ The UI follows a **minimalist, ops-intelligence aesthetic** — inspired by tool
 
 <div align="center">
 
-**Built with precision by the TransitOps engineering team.**
+**Built by OneReign.**
 
 </div>
