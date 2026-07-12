@@ -12,7 +12,7 @@ client `lib/api/maintenanceClient.ts` (which flips from mock to these routes whe
 | `prisma/schema.prisma` | Vehicle, Driver, Trip, MaintenanceLog, FuelLog, Expense. |
 | `prisma/seed.ts` | Demo fleet mirroring the UI mock data. |
 | `lib/prisma.ts` | Shared `PrismaClient` singleton. |
-| `lib/vehicleStatus.ts` | **Centralised** `updateVehicleStatus` engine — the only writer of `Vehicle.status`. |
+| `lib/statusTransitions.ts` | **Teammate-owned** (Person 2) status engine — the only writer of `Vehicle.status`. This module imports it; it does not own it. |
 | `lib/operationalCost.ts` | `getOperationalCost()` + `getFuelEfficiency()`. |
 | `lib/roi.ts` | `getVehicleROI()` (revenue vs. cost vs. capital). |
 | `lib/calc.ts` | Pure, DB-free formula helpers (single source of truth). |
@@ -66,16 +66,25 @@ revenue is modelled differently, change `totalRevenue` in `lib/roi.ts`.
   casing and stores the canonical value, and `getOperationalCost` filters on
   `"Maintenance"`. (An earlier version filtered lowercase `"maintenance"`, which
   would have made `maintenanceCost` always 0 — fixed.)
-- **Status is centralised:** every status change goes through
-  `updateVehicleStatus`; this module never writes `Vehicle.status` directly.
-- **Never override Retired:** enforced inside `updateVehicleStatus` via an atomic
-  `UPDATE ... WHERE status <> 'Retired'`, so it holds for every caller even under
-  concurrency — not just as a best-effort read-then-write in the route.
-- **Concurrency (maintenance-create vs. trip-dispatch):** the authoritative guard
-  is the atomic conditional update in `updateVehicleStatus`; two callers cannot
-  both win against a Retired vehicle. `updateVehicleStatus` also accepts an
-  optional `tx` client so a caller can make the status flip part of its own
-  transaction if it needs strict atomicity with related writes.
+- **Status is centralised (teammate-owned engine):** every status change goes
+  through `updateVehicleStatus(tx, vehicleId, newStatus)` in
+  `lib/statusTransitions.ts` (Person 2's shared engine). This module never writes
+  `Vehicle.status` directly and never reimplements it. The engine takes the tx
+  client **first** and must be called inside a `prisma.$transaction`, so the
+  record write and the status flip commit atomically.
+- **Legal-transition map:** the engine validates each move against an adjacency
+  map and throws `"Illegal vehicle transition: <from> -> <to>"` otherwise. Effects
+  for this module:
+  - Create → `"In Shop"` is legal only from `Available`/`On Trip`.
+  - Close → `"Available"` is legal only from `In Shop`, so the close route only
+    attempts the revert when the vehicle is actually `In Shop`.
+  - Retire → legal only from `Available`/`In Shop`; **an `On Trip` vehicle cannot
+    be retired** (→ `409`).
+- **Never override Retired:** `Retired` is a terminal state in the engine's map
+  (no outgoing transitions), so any attempt to move a retired vehicle throws —
+  the guarantee is enforced centrally, for every caller.
+- **Illegal transitions are mapped to `409`** by the maintenance-create and retire
+  routes (see `isIllegalTransition` in `lib/apiHelpers.ts`).
 - **Multiple open maintenance records:** `POST /api/maintenance` rejects a second
   `Active` record for the same vehicle (`409`). For a hard DB guarantee, add a
   partial unique index:
@@ -86,6 +95,7 @@ revenue is modelled differently, change `totalRevenue` in `lib/roi.ts`.
 - Zero fuel logs → `fuelEfficiency: null` (no divide-by-zero).
 - No matching rows → `_sum` null normalised to `0`.
 - Double-close → `409`; create maintenance on a Retired vehicle → `409`.
+- Illegal status transitions (e.g. retire an `On Trip` vehicle) → `409`.
 
 ## Open question for the team
 

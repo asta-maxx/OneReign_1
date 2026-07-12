@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { updateVehicleStatus } from "@/lib/vehicleStatus";
+import { updateVehicleStatus } from "@/lib/statusTransitions";
 import { jsonError } from "@/lib/apiHelpers";
 
 /**
@@ -37,16 +37,16 @@ export async function PATCH(
         data: { status: "Closed", closedAt: new Date() },
       });
 
-      // Revert to "Available" unless the vehicle is Retired — a vehicle can be
-      // retired while in the shop, and Retired must never be overridden. We skip
-      // the call when Retired rather than let the engine throw (which would abort
-      // the close). The engine also guards Retired atomically as a backstop.
+      // Revert to "Available" only when the vehicle is actually "In Shop" — the
+      // sole legal source for "-> Available" in the engine's transition map.
+      // This skips Retired (terminal) and any other state, so closing never
+      // throws an illegal-transition error and aborts the close.
       const vehicle = await tx.vehicle.findUnique({
         where: { id: existing.vehicleId },
         select: { status: true },
       });
-      if (vehicle && vehicle.status !== "Retired") {
-        await updateVehicleStatus(existing.vehicleId, "Available", { tx });
+      if (vehicle && vehicle.status === "In Shop") {
+        await updateVehicleStatus(tx, existing.vehicleId, "Available");
       }
 
       return updated;

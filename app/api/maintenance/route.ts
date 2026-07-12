@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-// Centralised, teammate-owned status engine. This module MUST route every
-// vehicle-status change through this function and never write Vehicle.status
-// directly, so that the Trip and Maintenance modules cannot fight over the field.
-import { updateVehicleStatus } from "@/lib/vehicleStatus";
-import { jsonError } from "@/lib/apiHelpers";
+// Centralised, teammate-owned status engine (Person 2). This module MUST route
+// every vehicle-status change through this function and never write
+// Vehicle.status directly, so the Trip and Maintenance modules cannot fight over
+// the field. Note: this engine takes the tx client FIRST and validates the move
+// against its legal-transition map (throws on an illegal transition).
+import { updateVehicleStatus } from "@/lib/statusTransitions";
+import { isIllegalTransition, jsonError } from "@/lib/apiHelpers";
 
 /**
  * POST /api/maintenance
@@ -86,8 +88,10 @@ export async function POST(req: NextRequest) {
         data: { vehicleId, description, status: "Active" },
       });
 
-      // Route the status change through the centralised engine, in-transaction.
-      await updateVehicleStatus(vehicleId, "In Shop", { tx });
+      // Route the status change through the centralised engine, in-transaction
+      // (tx-first signature). Legal from "Available"/"On Trip"; the engine
+      // rejects anything else (e.g. already "In Shop") by throwing.
+      await updateVehicleStatus(tx, vehicleId, "In Shop");
 
       return created;
     });
@@ -95,6 +99,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(log, { status: 201 });
   } catch (err) {
     if (err instanceof HttpError) return jsonError(err.message, err.status);
+    // e.g. vehicle already "In Shop" — not a legal source for "In Shop".
+    if (isIllegalTransition(err)) return jsonError(err.message, 409);
     console.error("POST /api/maintenance failed", err);
     return jsonError("Internal server error", 500);
   }
