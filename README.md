@@ -31,8 +31,6 @@ trip lifecycle orchestration, financial analytics, and operational intelligence.
 
 ---
 
----
-
 <br />
 
 ## 1. Architectural Overview
