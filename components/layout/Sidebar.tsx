@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Wrench, Fuel, Receipt, Truck, BarChart } from "lucide-react";
+import { LayoutDashboard, Car, Users, Route, Wrench, Receipt, BarChart, Settings, Truck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const routes = [
@@ -12,9 +12,19 @@ const routes = [
     href: "/dashboard",
   },
   {
-    label: "Analytics & Reports",
-    icon: BarChart,
-    href: "/reports",
+    label: "Vehicle Registry",
+    icon: Car,
+    href: "/vehicles",
+  },
+  {
+    label: "Drivers & Safety",
+    icon: Users,
+    href: "/drivers",
+  },
+  {
+    label: "Trip Dispatcher",
+    icon: Route,
+    href: "/dispatch",
   },
   {
     label: "Maintenance",
@@ -22,14 +32,19 @@ const routes = [
     href: "/maintenance",
   },
   {
-    label: "Fuel Logs",
-    icon: Fuel,
-    href: "/fuel-logs",
-  },
-  {
-    label: "Expenses",
+    label: "Fuel & Expenses",
     icon: Receipt,
     href: "/expenses",
+  },
+  {
+    label: "Reports & Analytics",
+    icon: BarChart,
+    href: "/reports",
+  },
+  {
+    label: "Settings",
+    icon: Settings,
+    href: "/settings",
   },
 ];
 
@@ -39,13 +54,13 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="flex flex-col w-64 bg-background border-r border-border/50 min-h-screen p-4">
+    <div className="flex flex-col w-64 bg-canvas border-r border-hairline-soft min-h-screen p-4">
       <div className="flex items-center gap-3 px-2 py-4 mb-8">
         <div className="p-1">
-          <Truck className="w-5 h-5 text-foreground" />
+          <Truck className="w-5 h-5 text-body-strong" />
         </div>
         <div>
-          <h1 className="text-lg font-semibold tracking-tight text-foreground leading-none">TransitOps</h1>
+          <h1 className="text-lg font-semibold tracking-tight text-body-strong leading-none">TransitOps</h1>
         </div>
       </div>
       <div className="flex-1 space-y-1">
@@ -58,24 +73,24 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-all group",
                 isActive 
-                  ? "bg-secondary text-foreground font-medium" 
-                  : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                  ? "bg-surface-elevated text-body-strong font-medium" 
+                  : "text-muted hover:bg-surface-elevated/50 hover:text-body-strong"
               )}
             >
-              <route.icon className={cn("w-4 h-4", isActive ? "text-foreground" : "text-muted-foreground group-hover:text-foreground")} />
+              <route.icon className={cn("w-4 h-4", isActive ? "text-body-strong" : "text-muted group-hover:text-body-strong")} />
               {route.label}
             </Link>
           );
         })}
       </div>
-      <div className="pt-4 border-t border-border/50 mt-auto flex items-center justify-between">
+      <div className="pt-4 border-t border-hairline-soft mt-auto flex items-center justify-between">
         <div className="flex items-center gap-3 px-2 py-2">
-          <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-medium text-muted-foreground">
+          <div className="w-8 h-8 rounded-full bg-surface-elevated flex items-center justify-center text-xs font-medium text-muted">
             TO
           </div>
           <div>
-            <p className="text-sm font-medium text-foreground">Fleet Admin</p>
-            <p className="text-xs text-muted-foreground">admin@transitops.com</p>
+            <p className="text-sm font-medium text-body-strong">Fleet Admin</p>
+            <p className="text-xs text-muted">admin@transitops.com</p>
           </div>
         </div>
         <ThemeToggle />

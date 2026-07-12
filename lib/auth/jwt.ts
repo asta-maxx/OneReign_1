@@ -26,7 +26,7 @@ export function signJwt(payload: JwtPayload): string {
     },
     secret,
     {
-      expiresIn: getJwtExpiresIn(),
+      expiresIn: getJwtExpiresIn() as any,
     }
   );
 

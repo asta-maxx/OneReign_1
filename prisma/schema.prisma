@@ -112,3 +112,13 @@ model Expense {
 
   @@index([vehicleId, type])
 }
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      String   @default("viewer")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

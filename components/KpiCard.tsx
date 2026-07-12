@@ -14,27 +14,27 @@ interface KpiCardProps {
   className?: string;
 }
 
-export function KpiCard({ title, value, icon: Icon, trend, className }: KpiCardProps) {
-  return (
-    <Card className={cn("shadow-sm transition-all hover:border-border/80 hover:shadow-md", className)}>
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between">
-          <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{title}</p>
-          {Icon && <Icon className="w-4 h-4 text-muted-foreground/60" />}
-        </div>
-        
-        <div className="mt-4">
-          <h2 className="text-4xl font-semibold tracking-tight tabular-nums">{value}</h2>
-        </div>
-
-        {trend && (
-          <div className="mt-4 flex items-center text-xs">
-            <span 
-              className={cn(
-                "flex items-center font-medium",
-                trend.isPositive ? "text-emerald-500" : "text-destructive"
-              )}
-            >
+  export function KpiCard({ title, value, icon: Icon, trend, className }: KpiCardProps) {
+    return (
+      <Card className={cn("transition-all border-hairline-soft hover:bg-surface-elevated", className)}>
+        <CardContent className="p-6">
+          <div className="flex items-start justify-between">
+            <p className="text-sm font-medium text-muted uppercase tracking-wider">{title}</p>
+            {Icon && <Icon className="w-4 h-4 text-muted/60" />}
+          </div>
+          
+          <div className="mt-4">
+            <h2 className="text-4xl font-semibold tracking-tight tabular-nums text-body-strong">{value}</h2>
+          </div>
+  
+          {trend && (
+            <div className="mt-4 flex items-center text-xs">
+              <span 
+                className={cn(
+                  "flex items-center font-medium",
+                  trend.isPositive ? "text-semantic-success" : "text-semantic-error"
+                )}
+              >
               {trend.isPositive ? (
                 <ArrowUpRight className="w-3 h-3 mr-1" />
               ) : (
