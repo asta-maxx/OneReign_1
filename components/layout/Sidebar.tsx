@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Car, Users, Route, Wrench, Receipt, BarChart, Settings, Truck } from "lucide-react";
+import { LayoutDashboard, Map, Car, Users, Route, Wrench, Receipt, BarChart, Settings, Truck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const routes = [
@@ -10,6 +10,11 @@ const routes = [
     label: "Dashboard",
     icon: LayoutDashboard,
     href: "/dashboard",
+  },
+  {
+    label: "Live Map",
+    icon: Map,
+    href: "/operations",
   },
   {
     label: "Vehicle Registry",

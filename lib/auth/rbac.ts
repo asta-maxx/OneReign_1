@@ -101,6 +101,7 @@ export function resourceForPath(pathname: string): Resource | null {
 
   // Pages
   if (pathname === "/dashboard") return "dashboard";
+  if (pathname.startsWith("/operations")) return "dashboard"; // live map — all authenticated roles
   if (pathname.startsWith("/vehicles")) return "vehicles";
   if (pathname.startsWith("/drivers")) return "drivers";
   if (pathname.startsWith("/dispatch")) return "trips"; // Trip Dispatcher page
