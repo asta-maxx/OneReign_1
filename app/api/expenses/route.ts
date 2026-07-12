@@ -21,11 +21,12 @@ export async function POST(req: NextRequest) {
     return jsonError("Invalid JSON body", 400);
   }
 
-  const { vehicleId, type, amount, date } = (body ?? {}) as {
+  const { vehicleId, type, amount, date, description } = (body ?? {}) as {
     vehicleId?: unknown;
     type?: unknown;
     amount?: unknown;
     date?: unknown;
+    description?: unknown;
   };
 
   if (typeof vehicleId !== "string" || vehicleId.length === 0) {
@@ -53,7 +54,13 @@ export async function POST(req: NextRequest) {
   if (!vehicle) return jsonError("Vehicle not found", 404);
 
   const expense = await prisma.expense.create({
-    data: { vehicleId, type: normalizedType, amount, date: parsedDate },
+    data: {
+      vehicleId,
+      type: normalizedType,
+      amount,
+      date: parsedDate,
+      description: typeof description === "string" ? description : null,
+    },
   });
   return NextResponse.json(expense, { status: 201 });
 }

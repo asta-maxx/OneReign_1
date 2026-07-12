@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Wrench, Plus, CheckCircle2 } from "lucide-react";
 
 export default function MaintenancePage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -95,22 +96,27 @@ export default function MaintenancePage() {
   const eligibleVehicles = vehicles.filter(v => v.status !== 'Retired');
 
   return (
-    <div className="container mx-auto py-8 max-w-6xl space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Maintenance Logs</h1>
-        <p className="text-muted-foreground mt-2">Manage vehicle repairs and routine maintenance.</p>
+    <div className="p-8 max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex items-center gap-3 border-b border-border pb-6">
+        <div className="p-2 border border-border/50 rounded-md">
+          <Wrench className="w-6 h-6 text-foreground" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Maintenance Logs</h1>
+          <p className="text-muted-foreground mt-1">Schedule repairs and manage vehicle service history.</p>
+        </div>
       </div>
 
-      <Card>
+      <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle>New Maintenance Record</CardTitle>
+          <CardTitle className="text-lg">New Maintenance Record</CardTitle>
           <CardDescription>Log a new repair or service. This will set the vehicle status to &quot;In Shop&quot;.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleCreateRecord} className="flex flex-col md:flex-row gap-4 items-start">
             <div className="w-full md:w-1/3">
-              <Select value={selectedVehicle} onValueChange={setSelectedVehicle} disabled={isSubmitting}>
-                <SelectTrigger>
+              <Select value={selectedVehicle} onValueChange={(v) => setSelectedVehicle(v ?? "")} disabled={isSubmitting}>
+                <SelectTrigger className="input-ring">
                   <SelectValue placeholder="Select Vehicle" />
                 </SelectTrigger>
                 <SelectContent>
@@ -126,9 +132,10 @@ export default function MaintenancePage() {
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 disabled={isSubmitting}
-                className="flex-1"
+                className="flex-1 input-ring"
               />
-              <Button type="submit" disabled={isSubmitting || !selectedVehicle || !description}>
+              <Button type="submit" disabled={isSubmitting || !selectedVehicle || !description} className="gap-2">
+                <Plus className="w-4 h-4" />
                 {isSubmitting ? "Logging..." : "Create Log"}
               </Button>
             </div>
@@ -136,92 +143,99 @@ export default function MaintenancePage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Maintenance History</CardTitle>
+      <Card className="shadow-sm">
+        <CardHeader className="bg-muted/30 border-b border-border/40">
+          <CardTitle className="text-base font-medium">Maintenance History</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {loading ? (
-            <div className="flex justify-center py-8 text-muted-foreground">Loading records...</div>
+            <div className="flex justify-center py-12 text-muted-foreground animate-pulse">Loading records...</div>
           ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-[250px]">Vehicle</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead>Closed</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right pr-6">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {records.length === 0 ? (
                   <TableRow>
-                    <TableHead>Vehicle</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Closed</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">No maintenance records found.</TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {records.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">No maintenance records found.</TableCell>
-                    </TableRow>
-                  ) : (
-                    records.map((record) => {
-                      const vehicle = vehicles.find(v => v.id === record.vehicleId);
-                      return (
-                        <TableRow key={record.id}>
-                          <TableCell className="font-medium">
-                            <div className="flex items-center gap-2">
-                              {record.vehicleName}
-                              {vehicle && (
-                                <Badge variant="outline" className={
-                                  vehicle.status === 'In Shop' ? 'text-amber-600 border-amber-200 bg-amber-50' :
-                                  vehicle.status === 'Available' ? 'text-emerald-600 border-emerald-200 bg-emerald-50' :
-                                  'text-muted-foreground'
-                                }>
-                                  {vehicle.status}
-                                </Badge>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>{record.description}</TableCell>
-                          <TableCell>{new Date(record.createdAt).toLocaleDateString()}</TableCell>
-                          <TableCell>{record.closedAt ? new Date(record.closedAt).toLocaleDateString() : '-'}</TableCell>
-                          <TableCell>
-                            <Badge variant={record.status === 'Active' ? 'default' : 'secondary'} className={
-                              record.status === 'Active' ? 'bg-amber-500 hover:bg-amber-600' : ''
-                            }>
-                              {record.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {record.status === 'Active' && (
-                              <Dialog open={recordToClose?.id === record.id} onOpenChange={(open) => !open && setRecordToClose(null)}>
-                                <DialogTrigger asChild>
-                                  <Button variant="outline" size="sm" onClick={() => setRecordToClose(record)}>
-                                    Close Record
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                  <DialogHeader>
-                                    <DialogTitle>Close Maintenance Record</DialogTitle>
-                                    <DialogDescription>
-                                      Are you sure you want to close this record? This will mark the vehicle &quot;{record.vehicleName}&quot; as Available again.
-                                    </DialogDescription>
-                                  </DialogHeader>
-                                  <DialogFooter>
-                                    <Button variant="outline" onClick={() => setRecordToClose(null)} disabled={isClosing}>Cancel</Button>
-                                    <Button onClick={handleCloseRecord} disabled={isClosing}>
-                                      {isClosing ? "Closing..." : "Confirm Close"}
-                                    </Button>
-                                  </DialogFooter>
-                                </DialogContent>
-                              </Dialog>
+                ) : (
+                  records.map((record) => {
+                    const vehicle = vehicles.find(v => v.id === record.vehicleId);
+                    return (
+                      <TableRow key={record.id} className="hover:bg-muted/50 transition-colors">
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-2">
+                            {record.vehicleName}
+                            {vehicle && (
+                              <Badge variant="outline" className={
+                                vehicle.status === 'In Shop' ? 'text-amber-500 border-amber-500/30' :
+                                vehicle.status === 'Available' ? 'text-emerald-500 border-emerald-500/30' :
+                                'text-muted-foreground'
+                              }>
+                                {vehicle.status}
+                              </Badge>
                             )}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{record.description}</TableCell>
+                        <TableCell>{new Date(record.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell>{record.closedAt ? new Date(record.closedAt).toLocaleDateString() : '-'}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={
+                            record.status === 'Active' 
+                              ? 'text-amber-500 border-amber-500/50' 
+                              : 'text-emerald-500 border-emerald-500/50'
+                          }>
+                            {record.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right pr-6">
+                          {record.status === 'Active' ? (
+                            <Dialog open={recordToClose?.id === record.id} onOpenChange={(open) => !open && setRecordToClose(null)}>
+                              <DialogTrigger
+                                render={
+                                  <Button variant="outline" size="sm" className="hover:text-emerald-500 hover:border-emerald-500/50 transition-colors" onClick={() => setRecordToClose(record)} />
+                                }
+                              >
+                                <CheckCircle2 className="w-4 h-4 mr-2" />
+                                Close Record
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Close Maintenance Record</DialogTitle>
+                                  <DialogDescription>
+                                    Are you sure you want to close this record? This will mark the vehicle &quot;{record.vehicleName}&quot; as Available again.
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <DialogFooter>
+                                  <Button variant="ghost" onClick={() => setRecordToClose(null)} disabled={isClosing}>Cancel</Button>
+                                  <Button onClick={handleCloseRecord} disabled={isClosing}>
+                                    {isClosing ? "Closing..." : "Confirm Close"}
+                                  </Button>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
+                          ) : (
+                            <span className="text-muted-foreground text-sm flex items-center justify-end gap-1">
+                              <CheckCircle2 className="w-4 h-4 text-emerald-500/70" /> Closed
+                            </span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>

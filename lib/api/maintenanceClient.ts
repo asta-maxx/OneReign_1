@@ -147,7 +147,7 @@ export const maintenanceClient = {
     return res.json();
   },
 
-  createExpense: async (vehicleId: string, type: string, amount: number, date: string): Promise<Expense> => {
+  createExpense: async (vehicleId: string, type: string, amount: number, description: string, date: string): Promise<Expense> => {
     if (USE_MOCK_API) {
       await new Promise(r => setTimeout(r, 500));
       const vehicle = mockVehicles.find(v => v.id === vehicleId);
@@ -158,6 +158,7 @@ export const maintenanceClient = {
         type,
         amount,
         date,
+        description,
       };
       mockExpenses.unshift(newExpense);
       return newExpense;
@@ -165,7 +166,7 @@ export const maintenanceClient = {
     const res = await fetch('/api/expenses', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ vehicleId, type, amount, date }),
+      body: JSON.stringify({ vehicleId, type, amount, date, description }),
     });
     if (!res.ok) throw new Error('Failed to log expense');
     return res.json();

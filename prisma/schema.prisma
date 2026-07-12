@@ -100,12 +100,13 @@ model FuelLog {
 }
 
 model Expense {
-  id        String   @id @default(cuid())
-  vehicleId String
-  type      String // "Toll" | "Maintenance" | "Other" (matches lib/types.ts)
-  amount    Float
-  date      DateTime
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  vehicleId   String
+  type        String // "Toll" | "Maintenance" | "Other" (matches lib/types.ts)
+  amount      Float
+  date        DateTime
+  description String? // optional free-text note (UI expenses form)
+  createdAt   DateTime @default(now())
 
   vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
 

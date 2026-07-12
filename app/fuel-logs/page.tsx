@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Droplet, DollarSign } from "lucide-react";
+import { Droplet, DollarSign, Plus, ArrowUpDown } from "lucide-react";
 
 export default function FuelLogsPage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -96,40 +96,45 @@ export default function FuelLogsPage() {
   }, [fuelLogs]);
 
   return (
-    <div className="container mx-auto py-8 max-w-6xl space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Fuel Logs</h1>
-        <p className="text-muted-foreground mt-2">Track fuel consumption and costs across the fleet.</p>
+    <div className="p-8 max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex items-center gap-3 border-b border-border pb-6">
+        <div className="p-2 border border-border/50 rounded-md">
+          <Droplet className="w-6 h-6 text-foreground" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Fuel Logs</h1>
+          <p className="text-muted-foreground mt-1">Track fuel consumption and costs across the fleet.</p>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card className="shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               Monthly Fuel Cost
             </CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${currentMonthTotal.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-3xl font-bold">${currentMonthTotal.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground mt-1">
               Total spent on fuel this month
             </p>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
+      <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle>Log Fuel Entry</CardTitle>
+          <CardTitle className="text-lg">Log Fuel Entry</CardTitle>
           <CardDescription>Record fuel purchases for a vehicle.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleCreateLog} className="grid gap-4 md:grid-cols-5 items-end">
+          <form onSubmit={handleCreateLog} className="grid gap-6 md:grid-cols-5 items-end">
             <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-medium">Vehicle</label>
-              <Select value={selectedVehicle} onValueChange={setSelectedVehicle} disabled={isSubmitting}>
-                <SelectTrigger>
+              <label className="text-sm font-medium text-muted-foreground">Vehicle</label>
+              <Select value={selectedVehicle} onValueChange={(v) => setSelectedVehicle(v ?? "")} disabled={isSubmitting}>
+                <SelectTrigger className="input-ring">
                   <SelectValue placeholder="Select Vehicle" />
                 </SelectTrigger>
                 <SelectContent>
@@ -141,7 +146,7 @@ export default function FuelLogsPage() {
             </div>
             
             <div className="space-y-2">
-              <label className="text-sm font-medium">Liters</label>
+              <label className="text-sm font-medium text-muted-foreground">Liters</label>
               <Input 
                 type="number" 
                 step="0.01" 
@@ -150,11 +155,12 @@ export default function FuelLogsPage() {
                 value={liters} 
                 onChange={e => setLiters(e.target.value)} 
                 disabled={isSubmitting} 
+                className="input-ring"
               />
             </div>
             
             <div className="space-y-2">
-              <label className="text-sm font-medium">Total Cost ($)</label>
+              <label className="text-sm font-medium text-muted-foreground">Total Cost ($)</label>
               <Input 
                 type="number" 
                 step="0.01" 
@@ -163,66 +169,67 @@ export default function FuelLogsPage() {
                 value={cost} 
                 onChange={e => setCost(e.target.value)} 
                 disabled={isSubmitting} 
+                className="input-ring"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Date</label>
+              <label className="text-sm font-medium text-muted-foreground">Date</label>
               <Input 
                 type="date" 
                 value={date} 
                 onChange={e => setDate(e.target.value)} 
                 disabled={isSubmitting} 
+                className="input-ring"
               />
             </div>
 
-            <Button type="submit" disabled={isSubmitting || !selectedVehicle || !liters || !cost || !date} className="md:col-span-5 w-full md:w-auto md:justify-self-end mt-4">
-              <Droplet className="w-4 h-4 mr-2" />
+            <Button type="submit" disabled={isSubmitting || !selectedVehicle || !liters || !cost || !date} className="md:col-span-5 w-full md:w-auto md:justify-self-end mt-2 gap-2">
+              <Plus className="w-4 h-4" />
               {isSubmitting ? "Logging..." : "Log Fuel"}
             </Button>
           </form>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Fuel History</CardTitle>
-          <Button variant="outline" size="sm" onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}>
-            Sort by Date ({sortOrder === 'desc' ? 'Newest First' : 'Oldest First'})
+      <Card className="shadow-sm">
+        <CardHeader className="flex flex-row items-center justify-between bg-muted/30 border-b border-border/40">
+          <CardTitle className="text-base font-medium">Fuel History</CardTitle>
+          <Button variant="outline" size="sm" onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')} className="gap-2">
+            <ArrowUpDown className="w-4 h-4" />
+            {sortOrder === 'desc' ? 'Newest First' : 'Oldest First'}
           </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {loading ? (
-            <div className="flex justify-center py-8 text-muted-foreground">Loading records...</div>
+            <div className="flex justify-center py-12 text-muted-foreground animate-pulse">Loading records...</div>
           ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-[150px]">Date</TableHead>
+                  <TableHead>Vehicle</TableHead>
+                  <TableHead className="text-right">Liters</TableHead>
+                  <TableHead className="text-right pr-6">Cost</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedLogs.length === 0 ? (
                   <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Vehicle</TableHead>
-                    <TableHead className="text-right">Liters</TableHead>
-                    <TableHead className="text-right">Cost</TableHead>
+                    <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">No fuel logs found.</TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sortedLogs.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">No fuel logs found.</TableCell>
+                ) : (
+                  sortedLogs.map((log) => (
+                    <TableRow key={log.id} className="hover:bg-muted/50 transition-colors">
+                      <TableCell className="font-medium">{new Date(log.date).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-muted-foreground">{log.vehicleName}</TableCell>
+                      <TableCell className="text-right font-mono">{log.liters.toFixed(2)} L</TableCell>
+                      <TableCell className="text-right font-mono pr-6">${log.cost.toFixed(2)}</TableCell>
                     </TableRow>
-                  ) : (
-                    sortedLogs.map((log) => (
-                      <TableRow key={log.id}>
-                        <TableCell>{new Date(log.date).toLocaleDateString()}</TableCell>
-                        <TableCell className="font-medium">{log.vehicleName}</TableCell>
-                        <TableCell className="text-right">{log.liters.toFixed(2)} L</TableCell>
-                        <TableCell className="text-right">${log.cost.toFixed(2)}</TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>

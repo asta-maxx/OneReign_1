@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { computeFuelEfficiency, toNumber } from "@/lib/calc";
 
+// This route queries the DB, so it must never be statically prerendered at build
+// time (which would try to connect to the DB). Force dynamic rendering.
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/analytics
  * Fleet-wide KPIs for the dashboard. All figures are computed with aggregate

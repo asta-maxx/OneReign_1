@@ -39,6 +39,7 @@ export interface Expense {
   type: string; // 'Toll', 'Maintenance', 'Other'
   amount: number;
   date: string;
+  description?: string;
 }
 
 export interface OperationalCost {
