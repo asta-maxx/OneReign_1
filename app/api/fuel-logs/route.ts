@@ -62,12 +62,11 @@ export async function POST(req: NextRequest) {
  */
 export async function GET(req: NextRequest) {
   const vehicleId = req.nextUrl.searchParams.get("vehicleId");
-  if (!vehicleId) {
-    return jsonError("vehicleId query parameter is required", 400);
-  }
+
+  const whereClause = vehicleId ? { vehicleId } : {};
 
   const logs = await prisma.fuelLog.findMany({
-    where: { vehicleId },
+    where: whereClause,
     orderBy: { date: "desc" },
   });
   return NextResponse.json(logs);

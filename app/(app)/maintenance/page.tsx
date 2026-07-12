@@ -174,7 +174,7 @@ export default function MaintenancePage() {
                       <TableRow key={record.id} className="hover:bg-muted/50 transition-colors">
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
-                            {record.vehicleName}
+                            {vehicle?.name ?? "Unknown Vehicle"}
                             {vehicle && (
                               <Badge variant="outline" className={
                                 vehicle.status === 'In Shop' ? 'text-amber-500 border-amber-500/30' :
@@ -213,7 +213,7 @@ export default function MaintenancePage() {
                                 <DialogHeader>
                                   <DialogTitle>Close Maintenance Record</DialogTitle>
                                   <DialogDescription>
-                                    Are you sure you want to close this record? This will mark the vehicle &quot;{record.vehicleName}&quot; as Available again.
+                                    Are you sure you want to close this record? This will mark the vehicle "{vehicle?.name ?? 'Unknown Vehicle'}" as Available again.
                                   </DialogDescription>
                                 </DialogHeader>
                                 <DialogFooter>
