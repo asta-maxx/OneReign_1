@@ -1,6 +1,16 @@
 import { PrismaClient } from "@prisma/client";
+import { hashPassword } from "../lib/auth/password";
 
 const prisma = new PrismaClient();
+
+// One demo login per RBAC role (password is the same for all demo accounts).
+const DEMO_PASSWORD = "password1234";
+const DEMO_USERS = [
+  { email: "fleet@transitops.local", name: "Fleet Manager", role: "Fleet Manager" },
+  { email: "driver@transitops.local", name: "Driver", role: "Driver" },
+  { email: "safety@transitops.local", name: "Safety Officer", role: "Safety Officer" },
+  { email: "finance@transitops.local", name: "Financial Analyst", role: "Financial Analyst" },
+];
 
 // Demo fleet mirrors the mock data in lib/api/maintenanceClient.ts so flipping
 // USE_MOCK_API to false yields the same starting state the UI was designed
@@ -15,6 +25,13 @@ async function main() {
   await prisma.trip.deleteMany();
   await prisma.driver.deleteMany();
   await prisma.vehicle.deleteMany();
+  await prisma.user.deleteMany();
+
+  // Demo users — one per RBAC role. Passwords are bcrypt-hashed.
+  const passwordHash = await hashPassword(DEMO_PASSWORD);
+  await prisma.user.createMany({
+    data: DEMO_USERS.map((u) => ({ ...u, password: passwordHash })),
+  });
 
   await prisma.vehicle.createMany({
     data: [
@@ -68,6 +85,8 @@ async function main() {
   });
 
   console.log("Seed complete: 4 vehicles, 1 driver, 3 trips, 2 maintenance logs, 2 fuel logs, 2 expenses.");
+  console.log(`Demo users (password: ${DEMO_PASSWORD}):`);
+  for (const u of DEMO_USERS) console.log(`  ${u.role.padEnd(18)} ${u.email}`);
 }
 
 main()
