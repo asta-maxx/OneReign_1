@@ -83,6 +83,11 @@ export interface CreateTripInput {
   region?: string;       // optional geographic region tag
 }
 
+export interface ListTripsFilter {
+  /** Only return trips whose status matches this value. */
+  status?: TripStatus;
+}
+
 // ─── Internal helpers ──────────────────────────────────────────────────────────
 
 /** Cast a raw DB string into a TripStatus literal (throws if unrecognised). */
@@ -361,6 +366,26 @@ export async function cancelTrip(tripId: string): Promise<TripResult> {
     const message = err instanceof Error ? err.message : "Unknown error during cancellation.";
     return errResult(`[trip] cancelTrip failed: ${message}`);
   }
+}
+
+// ─── Trip listing ────────────────────────────────────────────────────────────
+
+/**
+ * listTrips — return all trips, with optional status filter.
+ *
+ * @param filters  Optional: `status` — filter by exact TripStatus value.
+ * @returns  Array of TripWithRelations ordered by creation date (newest first).
+ */
+export async function listTrips(
+  filters?: ListTripsFilter
+): Promise<TripWithRelations[]> {
+  return prisma.trip.findMany({
+    where: {
+      ...(filters?.status !== undefined && { status: filters.status }),
+    },
+    include: { vehicle: true, driver: true },
+    orderBy: { createdAt: "desc" },
+  });
 }
 
 // ─── Trip creation ─────────────────────────────────────────────────────────────
