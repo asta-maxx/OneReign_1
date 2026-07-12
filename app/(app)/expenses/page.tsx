@@ -70,8 +70,8 @@ export default function ExpensesPage() {
       setAmount("");
       setDescription("");
       setType("");
-    } catch (error) {
-      toast.error("Failed to log expense.");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to log expense.");
     } finally {
       setIsSubmitting(false);
     }

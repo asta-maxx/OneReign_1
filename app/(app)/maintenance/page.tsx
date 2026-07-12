@@ -65,8 +65,8 @@ export default function MaintenancePage() {
       toast.success("Maintenance record created successfully.");
       setDescription("");
       setSelectedVehicle("");
-    } catch (error) {
-      toast.error("Failed to create maintenance record.");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to create maintenance record.");
     } finally {
       setIsSubmitting(false);
     }

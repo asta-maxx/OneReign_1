@@ -76,6 +76,11 @@ export const maintenanceClient = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ vehicleId, description }),
     });
+    if (res.status === 403) throw new Error('Forbidden: You do not have permission to log maintenance. Try logging in as fleet@transitops.local');
+    if (res.status === 409) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Conflict: Vehicle is likely already in shop or retired.');
+    }
     if (!res.ok) throw new Error('Failed to create maintenance record');
     return res.json();
   },
@@ -168,6 +173,7 @@ export const maintenanceClient = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ vehicleId, type, amount, date, description }),
     });
+    if (res.status === 403) throw new Error('Forbidden: You do not have permission to log expenses. Try logging in as finance@transitops.local');
     if (!res.ok) throw new Error('Failed to log expense');
     return res.json();
   },
