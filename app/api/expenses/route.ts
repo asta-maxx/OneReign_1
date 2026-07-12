@@ -1,21 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isNumberAtLeast, jsonError, parseNonFutureDate } from "@/lib/apiHelpers";
-
-// Allowed expense types. Canonical casing matches the frontend contract in
-// lib/types.ts ("Toll" | "Maintenance" | "Other"); getOperationalCost filters on
-// "Maintenance" so these MUST stay in sync.
-const EXPENSE_TYPES = ["Toll", "Maintenance", "Other"] as const;
-type ExpenseType = (typeof EXPENSE_TYPES)[number];
-
-// Accept any casing from the client, store the canonical capitalised value.
-// Returns null when the input isn't one of the allowed types.
-function normalizeExpenseType(value: unknown): ExpenseType | null {
-  if (typeof value !== "string") return null;
-  return (
-    EXPENSE_TYPES.find((t) => t.toLowerCase() === value.toLowerCase()) ?? null
-  );
-}
+// Canonical casing ("Toll" | "Maintenance" | "Other") matches lib/types.ts;
+// getOperationalCost filters on "Maintenance" so these MUST stay in sync.
+import { EXPENSE_TYPES, normalizeExpenseType } from "@/lib/calc";
 
 /**
  * POST /api/expenses

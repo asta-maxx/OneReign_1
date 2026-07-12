@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { computeFuelEfficiency, toNumber } from "@/lib/calc";
 
 /**
  * Operational cost & fuel-efficiency aggregation.
@@ -16,14 +17,6 @@ import { prisma } from "@/lib/prisma";
  * (lib/types.ts). Money is Float there, but `toNumber` also tolerates Decimal so
  * this stays correct if the columns are ever tightened to Decimal.
  */
-
-// Prisma `_sum` returns `null` when there are no matching rows. Normalise to a
-// plain number, treating the empty/no-rows case as 0. Also tolerates Decimal
-// (which implements valueOf()/toString()) in case money columns are tightened.
-function toNumber(value: unknown): number {
-  if (value === null || value === undefined) return 0;
-  return Number(value);
-}
 
 export interface OperationalCost {
   vehicleId: string;
@@ -116,6 +109,6 @@ export async function getFuelEfficiency(
     vehicleId,
     totalDistance,
     totalLitersUsed,
-    fuelEfficiency: totalLitersUsed > 0 ? totalDistance / totalLitersUsed : null,
+    fuelEfficiency: computeFuelEfficiency(totalDistance, totalLitersUsed),
   };
 }

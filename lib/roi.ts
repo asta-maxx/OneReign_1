@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getOperationalCost } from "@/lib/operationalCost";
+import { computeRoi } from "@/lib/calc";
 
 /**
  * Vehicle ROI.
@@ -44,7 +45,7 @@ export async function getVehicleROI(vehicleId: string): Promise<VehicleROI> {
     revenueAgg._sum.revenue == null ? 0 : Number(revenueAgg._sum.revenue);
   const operationalCost = opCost.totalCost;
   const netProfit = totalRevenue - operationalCost;
-  const roi = acquisitionCost > 0 ? netProfit / acquisitionCost : null;
+  const roi = computeRoi(netProfit, acquisitionCost);
 
   return {
     vehicleId,
