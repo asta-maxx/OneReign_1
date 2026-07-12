@@ -33,88 +33,52 @@ trip lifecycle orchestration, financial analytics, and operational intelligence.
 
 <br />
 
-## Overview
+## 1. Architectural Overview
 
-TransitOps is a modular, production-grade fleet management platform designed to handle the full operational lifecycle of a transport company — from vehicle acquisition and driver management, through trip dispatch and execution, to financial reporting and ROI analysis.
+TransitOps is a modular, production-grade fleet management platform designed to handle the full operational lifecycle of a transport company — from vehicle acquisition and driver management, through trip dispatch and execution, to financial reporting and ROI analysis. 
 
-The system is architected around a **state-machine-driven core** where vehicles and drivers transition through well-defined statuses with validated guard clauses, ensuring data integrity across every operation.
+The system leverages a **state-machine-driven core** where vehicles and drivers transition through well-defined statuses with validated guard clauses, ensuring strict data integrity across the platform.
 
-<br />
-
----
-
-<br />
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        Frontend (Next.js App Router)                │
-│  ┌──────────┐  ┌────────────┐  ┌───────────┐  ┌──────────────────┐ │
-│  │ Dashboard │  │ Reports &  │  │Maintenance│  │  Fuel Logs &     │ │
-│  │   KPIs    │  │ Analytics  │  │  Module   │  │   Expenses       │ │
-│  └─────┬─────┘  └─────┬──────┘  └─────┬─────┘  └───────┬──────────┘ │
-│        └───────────────┴───────────────┴────────────────┘            │
-│                          ↓ API Client Layer (lib/api/*)              │
-├─────────────────────────────────────────────────────────────────────┤
-│                        Backend (API Routes)                         │
-│  ┌──────────┐  ┌────────────┐  ┌───────────┐  ┌──────────────────┐ │
-│  │  Auth     │  │  Vehicles  │  │   Trips   │  │  Analytics &     │ │
-│  │  (JWT)    │  │  & Drivers │  │ Lifecycle │  │  Cost Engine     │ │
-│  └─────┬─────┘  └─────┬──────┘  └─────┬─────┘  └───────┬──────────┘ │
-│        └───────────────┴───────────────┴────────────────┘            │
-│                     ↓ Status Transition Engine                      │
-├─────────────────────────────────────────────────────────────────────┤
-│                    Data Layer (Prisma ORM + PostgreSQL)              │
-│  Vehicle ←→ Trip ←→ Driver    MaintenanceLog   FuelLog   Expense   │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
-### State Machines
+### High-Level System Design
 
 ```mermaid
-stateDiagram-v2
-    direction LR
+graph TD
+    subgraph Client Layer
+        UI[Next.js App Router UI]
+        Themes[Composio Theme Engine]
+        Components[shadcn/ui + Base UI]
+    end
 
-    state "Vehicle Lifecycle" as VL {
-        [*] --> Available
-        Available --> On_Trip : dispatch
-        On_Trip --> Available : complete / cancel
-        Available --> In_Shop : open maintenance
-        In_Shop --> Available : close maintenance
-        Available --> Retired : retire
-        On_Trip --> Retired : retire
-        In_Shop --> Retired : retire
-    }
-```
+    subgraph API Gateway & Controllers
+        AuthAPI[Auth & JWT Sessions]
+        FleetAPI[Vehicles & Drivers]
+        TripAPI[Dispatch & Lifecycle]
+        AnalyticAPI[Reports & Analytics]
+    end
+    
+    subgraph Core Services
+        State[State Machine Validator]
+        Calc[Financial Formula Engine]
+    end
 
-```mermaid
-stateDiagram-v2
-    direction LR
+    subgraph Data Persistence
+        Prisma[Prisma ORM]
+        DB[(PostgreSQL)]
+    end
 
-    state "Trip Lifecycle" as TL {
-        [*] --> Draft
-        Draft --> Dispatched : dispatch
-        Dispatched --> Completed : complete
-        Dispatched --> Cancelled : cancel
-        Draft --> Cancelled : cancel
-    }
-```
-
-```mermaid
-stateDiagram-v2
-    direction LR
-
-    state "Driver Lifecycle" as DL {
-        [*] --> Available
-        Available --> On_Trip : assigned
-        On_Trip --> Available : trip ends
-        Available --> Off_Duty : clock out
-        Off_Duty --> Available : clock in
-        Available --> Suspended : suspend
-        On_Trip --> Suspended : suspend
-        Off_Duty --> Suspended : suspend
-    }
+    UI --> AuthAPI
+    UI --> FleetAPI
+    UI --> TripAPI
+    UI --> AnalyticAPI
+    
+    AuthAPI --> Prisma
+    FleetAPI --> State
+    TripAPI --> State
+    AnalyticAPI --> Calc
+    
+    State --> Prisma
+    Calc --> Prisma
+    Prisma --> DB
 ```
 
 <br />
@@ -123,19 +87,21 @@ stateDiagram-v2
 
 <br />
 
-## Tech Stack
+## 2. Technology Stack
+
+Our infrastructure leverages modern, strictly-typed technologies to ensure high availability, scalable data access, and rapid feature iteration.
 
 | Layer | Technology | Purpose |
 |:------|:-----------|:--------|
-| **Framework** | ![Next.js](https://img.shields.io/badge/Next.js_14-000?style=flat-square&logo=next.js) | Server/client rendering, file-based routing |
-| **Language** | ![TypeScript](https://img.shields.io/badge/TypeScript_5-3178C6?style=flat-square&logo=typescript&logoColor=white) | End-to-end type safety |
-| **Database** | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL_16-4169E1?style=flat-square&logo=postgresql&logoColor=white) | Relational data store (self-hosted via Docker) |
-| **ORM** | ![Prisma](https://img.shields.io/badge/Prisma_5.22-2D3748?style=flat-square&logo=prisma&logoColor=white) | Schema-first data access with migrations |
-| **Styling** | ![Tailwind](https://img.shields.io/badge/Tailwind_3.4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white) | Design system with HSL token architecture |
-| **Charts** | ![Recharts](https://img.shields.io/badge/Recharts_3.9-22C55E?style=flat-square) | Custom-styled data visualizations |
-| **Auth** | ![JWT](https://img.shields.io/badge/bcrypt_+_JWT-000?style=flat-square&logo=jsonwebtokens&logoColor=white) | Password hashing, stateless token auth |
-| **Testing** | ![Vitest](https://img.shields.io/badge/Vitest_2.1-6E9F18?style=flat-square&logo=vitest&logoColor=white) | Unit tests for business logic & formulas |
-| **Infra** | ![Docker](https://img.shields.io/badge/Docker_Compose-2496ED?style=flat-square&logo=docker&logoColor=white) | One-command local PostgreSQL provisioning |
+| **Framework** | ![Next.js](https://img.shields.io/badge/Next.js_14-000?style=flat-square&logo=next.js) | Server/client rendering, file-based routing and middleware |
+| **Language** | ![TypeScript](https://img.shields.io/badge/TypeScript_5-3178C6?style=flat-square&logo=typescript&logoColor=white) | End-to-end type safety and compilation verification |
+| **Database** | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL_16-4169E1?style=flat-square&logo=postgresql&logoColor=white) | ACID-compliant relational data store |
+| **ORM** | ![Prisma](https://img.shields.io/badge/Prisma_5.22-2D3748?style=flat-square&logo=prisma&logoColor=white) | Schema-first data access with declarative migrations |
+| **Styling** | ![Tailwind](https://img.shields.io/badge/Tailwind_3.4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white) | Utility-first CSS with HSL token architecture |
+| **Visualizations**| ![Recharts](https://img.shields.io/badge/Recharts_3.9-22C55E?style=flat-square) | Dynamic, accessible, and responsive data charts |
+| **Authentication**| ![JWT](https://img.shields.io/badge/bcrypt_+_JWT-000?style=flat-square&logo=jsonwebtokens&logoColor=white) | Secure password hashing, stateless HttpOnly token auth |
+| **Testing** | ![Vitest](https://img.shields.io/badge/Vitest_2.1-6E9F18?style=flat-square&logo=vitest&logoColor=white) | Unit tests for business logic & financial formulas |
+| **Infrastructure**| ![Docker](https://img.shields.io/badge/Docker_Compose-2496ED?style=flat-square&logo=docker&logoColor=white) | Declarative environment provisioning |
 
 <br />
 
@@ -143,81 +109,54 @@ stateDiagram-v2
 
 <br />
 
-## Modules
+## 3. Core Modules
 
 <br />
 
-### ![Authentication](https://img.shields.io/badge/Authentication-0d1117?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMGFlYzAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTIgMjJzOC00IDgtMTBWNWwtOC0zLTggM3Y3YzAgNiA4IDEwIDggMTAiLz48L3N2Zz4=)
+### ![Authentication](https://img.shields.io/badge/Security_&_Auth-0d1117?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMGFlYzAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTIgMjJzOC00IDgtMTBWNWwtOC0zLTggM3Y3YzAgNiA4IDEwIDggMTAiLz48L3N2Zz4=)
 
-- Signup with input validation (email format, password strength, name length)
-- bcrypt password hashing (12 salt rounds)
-- JWT token generation with HttpOnly cookie transport
-- Foundation for login/logout session lifecycle
-
-<br />
-
-### ![Dashboard & Analytics](https://img.shields.io/badge/Dashboard_&_Analytics-0d1117?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMGFlYzAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSIzIiB5PSIzIiB3aWR0aD0iNyIgaGVpZ2h0PSI3Ii8+PHJlY3QgeD0iMTQiIHk9IjMiIHdpZHRoPSI3IiBoZWlnaHQ9IjciLz48cmVjdCB4PSIxNCIgeT0iMTQiIHdpZHRoPSI3IiBoZWlnaHQ9IjciLz48cmVjdCB4PSIzIiB5PSIxNCIgd2lkdGg9IjciIGhlaWdodD0iNyIvPjwvc3ZnPg==)
-
-- **KPI Grid** — Real-time fleet overview: Active Vehicles, Available, In Maintenance, Active Trips, Pending Trips, Drivers On Duty, Fleet Utilization %
-- **Filter Bar** — Dynamic filtering by status, region, vehicle type with URL state sync
-- **Utilization Chart** — Recharts Area chart with gradient fill, custom dark-theme tooltips
-- **Skeleton Loaders** — Layout-matching loading states (no spinners)
+- Robust sign-up workflows with input sanitization and validation.
+- Cryptographic password hashing utilizing **bcrypt** (12 salt rounds).
+- Stateless **JWT** authentication passing via secure HttpOnly cookies.
+- Comprehensive Role-Based Access Control (RBAC) foundation.
 
 <br />
 
-### ![Reports Hub](https://img.shields.io/badge/Reports_Hub-0d1117?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMGFlYzAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48bGluZSB4MT0iMTgiIHkxPSIyMCIgeDI9IjE4IiB5Mj0iMTAiLz48bGluZSB4MT0iMTIiIHkxPSIyMCIgeDI9IjEyIiB5Mj0iNCIvPjxsaW5lIHgxPSI2IiB5MT0iMjAiIHgyPSI2IiB5Mj0iMTQiLz48L3N2Zz4=)
+### ![Dashboard](https://img.shields.io/badge/Command_Center-0d1117?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMGFlYzAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSIzIiB5PSIzIiB3aWR0aD0iNyIgaGVpZ2h0PSI3Ii8+PHJlY3QgeD0iMTQiIHk9IjMiIHdpZHRoPSI3IiBoZWlnaHQ9IjciLz48cmVjdCB4PSIxNCIgeT0iMTQiIHdpZHRoPSI3IiBoZWlnaHQ9IjciLz48cmVjdCB4PSIzIiB5PSIxNCIgd2lkdGg9IjciIGhlaWdodD0iNyIvPjwvc3ZnPg==)
 
-| Report | Visualization | Key Metric |
-|:-------|:-------------|:-----------|
-| **Fuel Efficiency** | Bar chart + sortable table | km/l per vehicle with color-coded thresholds |
-| **Fleet Utilization** | Line chart + data table | Active vs. idle days with red-flagging |
-| **Operational Cost** | Stacked bar (Fuel vs. Maintenance) | Total cost per vehicle |
-| **ROI Analysis** | Color-coded data table | Per-vehicle return on investment % |
-
-> All reports include **client-side CSV export** — one-click download of the currently filtered dataset.
+- **KPI Grid**: Real-time multi-dimensional view of active vehicles, dispatch volume, and fleet utilization.
+- **Dynamic Filtering**: Complex multi-parameter filtering (by status, region, type) synchronized seamlessly with URL state.
+- **Utilization Visualizations**: Immersive Recharts Area charts augmented with gradient fills and theme-aware tooltips.
+- **Progressive Enhancement**: Skeleton loaders that perfectly mirror final DOM structures for layout-shift-free loading.
 
 <br />
 
-### ![Maintenance Management](https://img.shields.io/badge/Maintenance_Management-0d1117?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMGFlYzAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhMSAxIDAgMCAwIDAgMS40bDEuNiAxLjZhMSAxIDAgMCAwIDEuNCAwbDMuNy0zLjdhNiA2IDAgMCAxLTcuNCA3LjRsLTYgNmExLjUgMS41IDAgMCAxLTIuMS0yLjFsNi02YTYgNiAwIDAgMSA3LjQtNy40eiIvPjwvc3ZnPg==)
+### ![Lifecycle](https://img.shields.io/badge/State_Machine_Engine-0d1117?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMGFlYzAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSIxIiB5PSIzIiB3aWR0aD0iMTUiIGhlaWdodD0iMTMiIHJ4PSIyIi8+PHBhdGggZD0iTTE2IDhoM2EyIDIgMCAwIDEgMiAydjNhMiAyIDAgMCAxLTIgMmgtMyIvPjxjaXJjbGUgY3g9IjciIGN5PSIxNSIgcj0iMiIvPjxjaXJjbGUgY3g9IjE3IiBjeT0iMTUiIHI9IjIiLz48L3N2Zz4=)
 
-- Create, track, and close maintenance logs per vehicle
-- Vehicle status automatically transitions to `In Shop` on active maintenance
-- Closing a maintenance record restores vehicle to `Available`
+The core operational logic runs on strict transition engines to prevent invalid states.
 
-<br />
+```mermaid
+stateDiagram-v2
+    direction LR
 
-### ![Fuel Logs](https://img.shields.io/badge/Fuel_Logs-0d1117?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMGFlYzAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMyAyMnYtN2wxLTMgNC0yaDZsNCAyIDEgM3Y3Ii8+PHBhdGggZD0iTTEyIDJhNSA1IDAgMCAxIDUgNXYySDd2LTJhNSA1IDAgMCAxIDUtNXoiLz48L3N2Zz4=)
-
-- Log fuel fill-ups with volume (liters), cost, and date
-- Per-vehicle fuel history tracking
-- Data feeds into the Fuel Efficiency report
-
-<br />
-
-### ![Expense Tracking](https://img.shields.io/badge/Expense_Tracking-0d1117?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMGFlYzAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48bGluZSB4MT0iMTIiIHkxPSIxIiB4Mj0iMTIiIHkyPSIyMyIvPjxwYXRoIGQ9Ik0xNyA1SDkuNWE0IDQgMCAwIDAgMCA4aDVhNCA0IDAgMCAxIDAgOEg2Ii8+PC9zdmc+)
-
-- Categorized expenses: Toll, Maintenance, Other
-- Per-vehicle expense aggregation
-- Data feeds into the Operational Cost and ROI reports
+    state "Vehicle Status Matrix" as VL {
+        [*] --> Available
+        Available --> On_Trip : Dispatch
+        On_Trip --> Available : Complete / Cancel
+        Available --> In_Shop : Open Maintenance
+        In_Shop --> Available : Close Maintenance
+        Available --> Retired : Retire
+    }
+```
 
 <br />
 
-### ![Vehicle & Driver Lifecycle](https://img.shields.io/badge/Vehicle_&_Driver_Lifecycle-0d1117?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMGFlYzAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSIxIiB5PSIzIiB3aWR0aD0iMTUiIGhlaWdodD0iMTMiIHJ4PSIyIi8+PHBhdGggZD0iTTE2IDhoM2EyIDIgMCAwIDEgMiAydjNhMiAyIDAgMCAxLTIgMmgtMyIvPjxjaXJjbGUgY3g9IjciIGN5PSIxNSIgcj0iMiIvPjxjaXJjbGUgY3g9IjE3IiBjeT0iMTUiIHI9IjIiLz48L3N2Zz4=)
+### ![Financial](https://img.shields.io/badge/Financial_&_Analytics-0d1117?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMGFlYzAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48bGluZSB4MT0iMTgiIHkxPSIyMCIgeDI9IjE4IiB5Mj0iMTAiLz48bGluZSB4MT0iMTIiIHkxPSIyMCIgeDI9IjEyIiB5Mj0iNCIvPjxsaW5lIHgxPSI2IiB5MT0iMjAiIHgyPSI2IiB5Mj0iMTQiLz48L3N2Zz4=)
 
-- Full CRUD for vehicles and drivers
-- **State Machine Engine** (`lib/statusTransitions.ts`) — validates every status transition:
-  - Vehicle: `Available` → `On Trip` → `Available`, `Available` → `In Shop` → `Available`, `*` → `Retired`
-  - Driver: `Available` → `On Trip` → `Available`, `Available` → `Off Duty` → `Available`, `*` → `Suspended`
-- Atomic trip lifecycle: `Draft` → `Dispatched` → `Completed` | `Cancelled`
-
-<br />
-
-### ![Financial Formulas Engine](https://img.shields.io/badge/Financial_Formulas_Engine-0d1117?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMGFlYzAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSI0IiB5PSIyIiB3aWR0aD0iMTYiIGhlaWdodD0iMjAiIHJ4PSIyIi8+PGxpbmUgeDE9IjgiIHkxPSI2IiB4Mj0iMTYiIHkyPSI2Ii8+PGxpbmUgeDE9IjgiIHkxPSIxMCIgeDI9IjE2IiB5Mj0iMTAiLz48bGluZSB4MT0iOCIgeTE9IjE0IiB4Mj0iMTIiIHkyPSIxNCIvPjwvc3ZnPg==)
-
-- **Fuel Efficiency** — `distanceKm / totalLiters` per vehicle
-- **Operational Cost** — aggregated fuel + maintenance + expenses per vehicle per period
-- **ROI** — `(Revenue - OperationalCost) / AcquisitionCost x 100`
-- All formulas are unit-tested with Vitest (`lib/calc.test.ts`)
+- **Fuel Efficiency Algorithms**: Computational analysis of `distanceKm / totalLiters` across the fleet.
+- **Operational Cost Aggregation**: Unifying fuel logs, maintenance overhead, and variable expenses per time period.
+- **ROI Engine**: Real-time evaluation of `((Revenue - OperationalCost) / AcquisitionCost) * 100`.
+- **Client-Side Export**: Integrated CSV generation algorithms across all data tables for deep offline analysis.
 
 <br />
 
@@ -225,20 +164,22 @@ stateDiagram-v2
 
 <br />
 
-## Data Model
+## 4. Entity-Relationship Architecture
+
+The normalized PostgreSQL schema provides high query performance and referential integrity across 6 distinct but deeply connected domain models.
 
 ```mermaid
 erDiagram
-    Vehicle ||--o{ MaintenanceLog : has
-    Vehicle ||--o{ FuelLog : has
-    Vehicle ||--o{ Expense : has
-    Vehicle ||--o{ Trip : has
-    Driver ||--o{ Trip : drives
+    Vehicle ||--o{ MaintenanceLog : records
+    Vehicle ||--o{ FuelLog : consumes
+    Vehicle ||--o{ Expense : incurs
+    Vehicle ||--o{ Trip : fulfills
+    Driver ||--o{ Trip : operates
+    User ||--o{ Action : performs
 
     Vehicle {
         string id PK
         string regNumber UK
-        string name
         string type
         int maxLoadCapacity
         int odometer
@@ -248,9 +189,7 @@ erDiagram
 
     Driver {
         string id PK
-        string name
         string licenseNumber UK
-        string licenseCategory
         date licenseExpiry
         float safetyScore
         string status
@@ -263,34 +202,8 @@ erDiagram
         string status
         float distance
         float revenue
-        string region
-    }
-
-    MaintenanceLog {
-        string id PK
-        string vehicleId FK
-        string description
-        string status
-    }
-
-    FuelLog {
-        string id PK
-        string vehicleId FK
-        float liters
-        float cost
-        date date
-    }
-
-    Expense {
-        string id PK
-        string vehicleId FK
-        string type
-        float amount
-        date date
     }
 ```
-
-> **6 models** · All relationships indexed · Status fields use plain strings (not enums) for flexibility with space-containing values like `"On Trip"` and `"In Shop"`.
 
 <br />
 
@@ -298,52 +211,23 @@ erDiagram
 
 <br />
 
-## API Surface
+## 5. API Topography
 
 ```mermaid
-graph LR
-    subgraph Auth
-        POST_signup["POST /api/auth/signup"]
-        POST_login["POST /api/auth/login"]
-        POST_logout["POST /api/auth/logout"]
-    end
-
-    subgraph Vehicles
-        GET_vehicles["GET /api/vehicles"]
-        POST_vehicles["POST /api/vehicles"]
-        GET_available["GET /api/vehicles/available"]
-        POST_retire["POST /api/vehicles/:id/retire"]
-        GET_opcost["GET /api/vehicles/:id/operational-cost"]
-        GET_roi["GET /api/vehicles/:id/roi"]
-    end
-
-    subgraph Drivers
-        GET_drivers["GET /api/drivers"]
-        POST_drivers["POST /api/drivers"]
-        GET_davail["GET /api/drivers/available"]
-        PATCH_driver["PATCH /api/drivers/:id"]
-    end
-
-    subgraph Trips
-        GET_trips["GET /api/trips"]
-        POST_trips["POST /api/trips"]
-        POST_dispatch["POST /api/trips/:id/dispatch"]
-        POST_complete["POST /api/trips/:id/complete"]
-        POST_cancel["POST /api/trips/:id/cancel"]
-    end
-
-    subgraph Operations
-        GET_maint["GET /api/maintenance"]
-        POST_maint["POST /api/maintenance"]
-        GET_fuel["GET /api/fuel-logs"]
-        POST_fuel["POST /api/fuel-logs"]
-        GET_exp["GET /api/expenses"]
-        POST_exp["POST /api/expenses"]
-    end
-
-    subgraph Analytics
-        GET_kpis["GET /api/analytics"]
-    end
+flowchart LR
+    Gateway((Client)) --> Auth["/api/auth"]
+    Gateway --> Ops["/api/vehicles"]
+    Gateway --> Dispatch["/api/trips"]
+    Gateway --> Logs["/api/maintenance"]
+    
+    Auth --> Signup
+    Auth --> Session
+    
+    Ops --> Fetch[Available Lookup]
+    Ops --> Metrics[ROI & OpCost]
+    
+    Dispatch --> Create
+    Dispatch --> Lifecycle[Dispatch / Complete]
 ```
 
 <br />
@@ -352,55 +236,37 @@ graph LR
 
 <br />
 
-## Getting Started
+## 6. Installation & Deployment
 
-### Prerequisites
-
-| Requirement | Version |
-|:------------|:--------|
+### Dependencies
+| Requirement | Minimum Version |
+|:------------|:----------------|
 | ![Node](https://img.shields.io/badge/Node.js-≥_18-339933?style=flat-square&logo=node.js&logoColor=white) | LTS recommended |
-| ![Docker](https://img.shields.io/badge/Docker-Latest-2496ED?style=flat-square&logo=docker&logoColor=white) | For PostgreSQL |
+| ![Docker](https://img.shields.io/badge/Docker-Latest-2496ED?style=flat-square&logo=docker&logoColor=white) | Required for local Database |
 
-### Setup
+### Startup Sequence
 
 ```bash
-# 1. Clone the repository
+# 1. Clone the repository and install packages
 git clone https://github.com/asta-maxx/OneReign_1.git
 cd OneReign_1
-
-# 2. Install dependencies
 npm install
 
-# 3. Start PostgreSQL
+# 2. Spin up the relational database
 docker compose up -d
 
-# 4. Configure environment
-cp .env.example .env
-
-# 5. Run database migrations & generate client
+# 3. Apply schema and generate types
 npx prisma migrate dev
 npx prisma generate
 
-# 6. Seed the database (optional)
+# 4. (Optional) Hydrate database with mock data
 npm run db:seed
 
-# 7. Start the development server
+# 5. Launch the application
 npm run dev
 ```
 
-Open **http://localhost:3000** to view the application.
-
-### Available Scripts
-
-| Command | Description |
-|:--------|:------------|
-| `npm run dev` | Start development server with hot reload |
-| `npm run build` | Create production build |
-| `npm run test` | Run unit tests (Vitest) |
-| `npm run lint` | Run ESLint |
-| `npm run prisma:generate` | Regenerate Prisma Client |
-| `npm run prisma:migrate` | Run pending database migrations |
-| `npm run db:seed` | Seed database with sample data |
+Visit the application at **http://localhost:3000**.
 
 <br />
 
@@ -408,63 +274,13 @@ Open **http://localhost:3000** to view the application.
 
 <br />
 
-## Project Structure
+## 7. UI / UX Design System
 
-```
-├── app/
-│   ├── api/                    # Backend API routes
-│   │   ├── auth/               #   ├── signup, login, logout
-│   │   ├── analytics/          #   ├── Fleet KPIs & aggregations
-│   │   ├── vehicles/           #   ├── CRUD + retire + operational-cost + ROI
-│   │   ├── drivers/            #   ├── CRUD + available lookup
-│   │   ├── trips/              #   ├── CRUD + dispatch + complete + cancel
-│   │   ├── maintenance/        #   ├── Create, list, close
-│   │   ├── fuel-logs/          #   ├── Create, list
-│   │   └── expenses/           #   └── Create, list
-│   ├── dashboard/              # Dashboard screen (KPIs + charts)
-│   ├── reports/                # Analytics reports (4 tabs)
-│   ├── maintenance/            # Maintenance management UI
-│   ├── fuel-logs/              # Fuel logging UI
-│   └── expenses/               # Expense tracking UI
-├── components/
-│   ├── ui/                     # shadcn/ui primitives
-│   ├── layout/                 # Sidebar navigation
-│   ├── KpiCard.tsx             # Reusable KPI display card
-│   ├── FilterBar.tsx           # Dynamic filter controls
-│   ├── ReportTable.tsx         # Generic table + CSV export
-│   ├── ChartTooltip.tsx        # Custom Recharts tooltip
-│   └── SkeletonLoaders.tsx     # Loading state components
-├── lib/
-│   ├── api/                    # API client layer (mock-toggle)
-│   ├── auth/                   # JWT, bcrypt, validation utilities
-│   ├── statusTransitions.ts    # State machine for Vehicle/Driver
-│   ├── trip.ts                 # Trip lifecycle engine
-│   ├── driver.ts               # Driver CRUD operations
-│   ├── calc.ts                 # Financial formula library
-│   ├── calc.test.ts            # Formula unit tests
-│   └── prisma.ts               # Database client singleton
-├── prisma/
-│   └── schema.prisma           # Data model (6 models)
-└── docker-compose.yml          # PostgreSQL 16 container
-```
+The application strictly adheres to a **minimalist, ops-intelligence aesthetic** (heavily inspired by developer infrastructure platforms like Vercel, Linear, and Stripe).
 
-<br />
-
----
-
-<br />
-
-## Design System
-
-The UI follows a **minimalist, ops-intelligence aesthetic** — inspired by tools like Linear, Vercel, and Stripe Dashboard.
-
-| Principle | Implementation |
-|:----------|:--------------|
-| **Dark-first** | Pure black (`#000`) background with zinc-toned cards |
-| **HSL Tokens** | All colors driven by CSS custom properties, zero hardcoded hex values |
-| **Typography** | Strong hierarchy with `tabular-nums` for financial data, `tracking-tight` for headings |
-| **Elevation** | Subtle `shadow-sm` + thin 1px borders (`border-border/50`), never both heavy shadow and thick border |
-| **Interactions** | Hover lift on cards, smooth transitions on filter changes, Recharts entrance animations |
+- **Multi-Theme Support**: Flawless transitions between pure black (`#0f0f0f`) dark modes and crisp white light modes using a centralized `ThemeProvider`.
+- **CSS Variable Architecture**: All tokens are strictly defined in HSL, completely avoiding hardcoded HEX values to ensure infinite scalability.
+- **Data Display**: Tabular numbers for financial integrity, subtle elevations for interactive surfaces, and Recharts optimized with custom CSS vars.
 
 <br />
 
@@ -473,7 +289,9 @@ The UI follows a **minimalist, ops-intelligence aesthetic** — inspired by tool
 <br />
 
 <div align="center">
-
-**Built by OneReign.**
-
+  <br />
+  <strong>Built by OneReign</strong>
+  <br />
+  <br />
+  <img src="https://img.shields.io/badge/Crafted_with_Precision-000000?style=for-the-badge&logo=vercel" alt="Precision" />
 </div>
