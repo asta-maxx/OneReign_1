@@ -33,6 +33,8 @@ const routes = [
   },
 ];
 
+import { ThemeToggle } from "@/components/ThemeToggle";
+
 export function Sidebar() {
   const pathname = usePathname();
 
@@ -66,7 +68,7 @@ export function Sidebar() {
           );
         })}
       </div>
-      <div className="pt-4 border-t border-border/50 mt-auto">
+      <div className="pt-4 border-t border-border/50 mt-auto flex items-center justify-between">
         <div className="flex items-center gap-3 px-2 py-2">
           <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-medium text-muted-foreground">
             TO
@@ -76,6 +78,7 @@ export function Sidebar() {
             <p className="text-xs text-muted-foreground">admin@transitops.com</p>
           </div>
         </div>
+        <ThemeToggle />
       </div>
     </div>
   );
