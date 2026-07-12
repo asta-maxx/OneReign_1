@@ -1,4 +1,4 @@
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 // Types based on expected API responses
 export interface DashboardKPIs {

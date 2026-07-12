@@ -1,6 +1,6 @@
 import { Vehicle, MaintenanceRecord, FuelLog, Expense, OperationalCost } from '../types';
 
-const USE_MOCK_API = true;
+const USE_MOCK_API = false;
 
 // Mock Data
 let mockVehicles: Vehicle[] = [
