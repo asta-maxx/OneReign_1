@@ -44,20 +44,48 @@ export async function POST(req: NextRequest) {
     return jsonError("type is required", 400);
   }
 
+  function validateNonNegativeFiniteNumber(
+    value: unknown,
+    field: string
+  ): number {
+    // Allow missing -> default to 0, preserve existing behavior.
+    if (value === undefined || value === null) return 0;
+
+    // Require actual numbers (not strings) to avoid silent coercion bugs.
+    if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+      throw new Error(`${field} must be a non-negative finite number`);
+    }
+    return value;
+  }
+
   try {
+    const validatedMaxLoadCapacity = validateNonNegativeFiniteNumber(
+      maxLoadCapacity,
+      "maxLoadCapacity"
+    );
+    const validatedOdometer = validateNonNegativeFiniteNumber(
+      odometer,
+      "odometer"
+    );
+    const validatedAcquisitionCost = validateNonNegativeFiniteNumber(
+      acquisitionCost,
+      "acquisitionCost"
+    );
+
     const vehicle = await prisma.vehicle.create({
       data: {
-        regNumber,
-        name,
-        type,
-        maxLoadCapacity: Number(maxLoadCapacity) || 0,
-        odometer: Number(odometer) || 0,
-        acquisitionCost: Number(acquisitionCost) || 0,
+        regNumber: regNumber.trim(),
+        name: name.trim(),
+        type: type.trim(),
+        maxLoadCapacity: validatedMaxLoadCapacity,
+        odometer: validatedOdometer,
+        acquisitionCost: validatedAcquisitionCost,
         status: "Available",
       },
     });
     return NextResponse.json(vehicle, { status: 201 });
   } catch (err: unknown) {
+
     // Unique constraint on regNumber.
     if (
       err &&
