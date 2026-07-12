@@ -31,21 +31,6 @@ trip lifecycle orchestration, financial analytics, and operational intelligence.
 
 ---
 
-<br />
-
-## Visual Tour
-
-### Dashboard Overview
-![Dashboard Overview](/public/screenshots/ui-1.png)
-
-### Real-time Dispatch Map
-![Operations Map](/public/screenshots/ui-2.png)
-
-### Secure Role-Based Authentication
-![Login Gateway](/public/screenshots/ui-3.png)
-
-<br />
-
 ---
 
 <br />
