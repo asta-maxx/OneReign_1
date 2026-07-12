@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 import { FilterBar, FilterState } from "@/components/FilterBar";
 import { KpiCard } from "@/components/KpiCard";
 import { SkeletonKpiCard, SkeletonChart } from "@/components/SkeletonLoaders";
@@ -104,21 +105,19 @@ export default function DashboardPage() {
             <CardTitle className="font-display text-2xl uppercase tracking-widest text-ink">Recent Alerts</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Hardcoded sample data for now */}
-            <div className="flex items-start gap-3 p-4 bg-soft-cloud text-ink border-l-4 border-sale">
-              <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-sale" />
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-widest">Vehicle V-104 Engine Light</p>
-                <p className="text-xs text-mute mt-1 uppercase tracking-widest">Reported 10 mins ago</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3 p-4 bg-soft-cloud text-ink border-l-4 border-sale">
-              <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-sale" />
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-widest">Driver D-02 Speeding</p>
-                <p className="text-xs text-mute mt-1 uppercase tracking-widest">Reported 45 mins ago</p>
-              </div>
-            </div>
+            {kpis?.recentAlerts?.length === 0 ? (
+              <p className="text-sm text-mute italic">No recent alerts.</p>
+            ) : (
+              kpis?.recentAlerts?.map((alert) => (
+                <div key={alert.id} className="flex items-start gap-3 p-4 bg-soft-cloud text-ink border-l-4 border-sale">
+                  <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-sale" />
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-widest">{alert.title}</p>
+                    <p className="text-xs text-mute mt-1 uppercase tracking-widest">{alert.timeAgo}</p>
+                  </div>
+                </div>
+              ))
+            )}
           </CardContent>
         </Card>
 
@@ -129,18 +128,18 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-hairline pb-4">
-                <span className="text-sm font-medium text-ink uppercase tracking-widest">V-101 (Sprinter Van)</span>
-                <span className="text-xs px-3 py-1 bg-success/10 text-success rounded-full font-semibold uppercase tracking-widest">In Transit</span>
-              </div>
-              <div className="flex items-center justify-between border-b border-hairline pb-4">
-                <span className="text-sm font-medium text-ink uppercase tracking-widest">V-102 (Box Truck)</span>
-                <span className="text-xs px-3 py-1 bg-soft-cloud text-mute rounded-full font-semibold uppercase tracking-widest">Idle</span>
-              </div>
-              <div className="flex items-center justify-between border-b border-hairline pb-4">
-                <span className="text-sm font-medium text-ink uppercase tracking-widest">V-103 (Sedan)</span>
-                <span className="text-xs px-3 py-1 bg-sale/10 text-sale rounded-full font-semibold uppercase tracking-widest">Maintenance</span>
-              </div>
+              {kpis?.fleetStatus?.length === 0 ? (
+                <p className="text-sm text-mute italic">No active fleet status.</p>
+              ) : (
+                kpis?.fleetStatus?.map((vehicle) => (
+                  <div key={vehicle.id} className="flex items-center justify-between border-b border-hairline pb-4 last:border-0 last:pb-0">
+                    <span className="text-sm font-medium text-ink uppercase tracking-widest">{vehicle.name}</span>
+                    <span className={cn("text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-widest", vehicle.colorClass)}>
+                      {vehicle.status}
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>

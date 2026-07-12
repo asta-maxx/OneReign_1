@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Settings, Shield, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 type Tab = "profile" | "system" | "rbac";
 
@@ -60,11 +61,24 @@ export default function SettingsPage() {
                   <CardTitle className="text-lg">Invite User</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <form className="space-y-4">
+                  <form 
+                    className="space-y-4"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const form = e.target as HTMLFormElement;
+                      const emailInput = form.querySelector('input[type="email"]') as HTMLInputElement;
+                      if (emailInput && emailInput.value) {
+                        toast.success(`Invite sent successfully to ${emailInput.value}`);
+                        form.reset();
+                      } else {
+                        toast.error("Please enter a valid email address.");
+                      }
+                    }}
+                  >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Email Address</label>
-                        <Input placeholder="user@transitops.com" />
+                        <Input type="email" placeholder="user@transitops.com" required />
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Role</label>
@@ -80,7 +94,7 @@ export default function SettingsPage() {
                         </Select>
                       </div>
                     </div>
-                    <Button>Send Invite</Button>
+                    <Button type="submit">Send Invite</Button>
                   </form>
                 </CardContent>
               </Card>

@@ -9,6 +9,8 @@ export interface DashboardKPIs {
   pendingTrips: number;
   driversOnDuty: number;
   fleetUtilizationPct: number;
+  recentAlerts?: { id: string; title: string; timeAgo: string }[];
+  fleetStatus?: { id: string; name: string; status: string; colorClass: string }[];
 }
 
 export interface FuelEfficiencyReport {
@@ -73,6 +75,15 @@ export const reportsClient = {
         pendingTrips: 8,
         driversOnDuty: 22,
         fleetUtilizationPct: 82.5,
+        recentAlerts: [
+          { id: "m1", title: "Volvo FH16 (TRK-001) - Engine Light", timeAgo: "Reported 10 mins ago" },
+          { id: "m2", title: "Scania R500 (TRK-002) - Brake issue", timeAgo: "Reported 45 mins ago" },
+        ],
+        fleetStatus: [
+          { id: "v1", name: "Volvo FH16 (TRK-001)", status: "On Trip", colorClass: "bg-ink/10 text-ink" },
+          { id: "v2", name: "Scania R500 (TRK-002)", status: "Available", colorClass: "bg-success/10 text-success" },
+          { id: "v3", name: "Mercedes Actros (TRK-003)", status: "In Shop", colorClass: "bg-sale/10 text-sale" },
+        ]
       };
     }
     

@@ -83,6 +83,8 @@ export interface DashboardKPIs {
   pendingTrips: number;
   driversOnDuty: number;
   fleetUtilizationPct: number;
+  recentAlerts: { id: string; title: string; timeAgo: string }[];
+  fleetStatus: { id: string; name: string; status: string; colorClass: string }[];
 }
 
 export async function getDashboardKPIs(filters?: {
@@ -95,10 +97,21 @@ export async function getDashboardKPIs(filters?: {
   if (filters?.type && filters.type !== "all") vehicleWhere.type = filters.type;
   if (filters?.status && filters.status !== "all") vehicleWhere.status = filters.status;
 
-  const [vehStatus, tripStatus, driverStatus] = await Promise.all([
+  const [vehStatus, tripStatus, driverStatus, recentMaintenance, vehiclesList] = await Promise.all([
     prisma.vehicle.groupBy({ by: ["status"], where: vehicleWhere, _count: { _all: true } }),
     prisma.trip.groupBy({ by: ["status"], _count: { _all: true } }),
     prisma.driver.groupBy({ by: ["status"], _count: { _all: true } }),
+    prisma.maintenanceLog.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      where: { status: { not: "Completed" } },
+      include: { vehicle: true },
+    }),
+    prisma.vehicle.findMany({
+      where: vehicleWhere,
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    })
   ]);
 
   const vc = Object.fromEntries(vehStatus.map((s) => [s.status, s._count._all]));
@@ -110,15 +123,42 @@ export async function getDashboardKPIs(filters?: {
   const inShop = vc["In Shop"] ?? 0;
   const nonRetired = available + onTrip + inShop;
 
+  const timeAgo = (date: Date) => {
+    const mins = Math.floor((Date.now() - date.getTime()) / 60000);
+    if (mins < 60) return `${mins} mins ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs} hours ago`;
+    return `${Math.floor(hrs / 24)} days ago`;
+  };
+
+  const getStatusColorClass = (status: string) => {
+    switch (status) {
+      case "Available": return "bg-success/10 text-success";
+      case "On Trip": return "bg-ink/10 text-ink";
+      case "In Shop": return "bg-sale/10 text-sale";
+      default: return "bg-soft-cloud text-mute";
+    }
+  };
+
   return {
-    activeVehicles: nonRetired, // in-service fleet (everything except Retired)
+    activeVehicles: nonRetired,
     availableVehicles: available,
     inMaintenance: inShop,
     activeTrips: tc["Dispatched"] ?? 0,
     pendingTrips: tc["Draft"] ?? 0,
     driversOnDuty: (dc["Available"] ?? 0) + (dc["On Trip"] ?? 0),
-    fleetUtilizationPct:
-      nonRetired > 0 ? parseFloat(((onTrip / nonRetired) * 100).toFixed(1)) : 0,
+    fleetUtilizationPct: nonRetired > 0 ? parseFloat(((onTrip / nonRetired) * 100).toFixed(1)) : 0,
+    recentAlerts: recentMaintenance.map(m => ({
+      id: m.id,
+      title: `${m.vehicle.name} - ${m.description}`,
+      timeAgo: `Reported ${timeAgo(m.createdAt)}`
+    })),
+    fleetStatus: vehiclesList.map(v => ({
+      id: v.id,
+      name: `${v.name} (${v.type})`,
+      status: v.status,
+      colorClass: getStatusColorClass(v.status)
+    }))
   };
 }
 
