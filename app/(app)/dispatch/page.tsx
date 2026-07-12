@@ -112,8 +112,8 @@ export default function DispatchPage() {
                     </div>
                   </div>
                   <div className="flex gap-4">
-                    <Button variant="outline" className="w-full h-11" onClick={() => setStep(1)}>Back</Button>
-                    <Button className="w-full h-11" onClick={() => setStep(3)}>Review Trip</Button>
+                    <Button variant="outline" className="flex-1 h-11" onClick={() => setStep(1)}>Back</Button>
+                    <Button className="flex-1 h-11" onClick={() => setStep(3)}>Review Trip</Button>
                   </div>
                 </div>
               )}
@@ -144,9 +144,9 @@ export default function DispatchPage() {
                     </div>
                   </div>
                   <div className="flex gap-4">
-                    <Button variant="outline" className="w-full h-11" onClick={() => setStep(2)}>Back</Button>
+                    <Button variant="outline" className="flex-1 h-11" onClick={() => setStep(2)}>Back</Button>
                     <Button 
-                      className="w-full h-11 bg-semantic-success hover:bg-semantic-success/90 text-white" 
+                      className="flex-1 h-11 bg-semantic-success hover:bg-semantic-success/90 text-white" 
                       onClick={() => {
                         setIsSubmitting(true);
                         setTimeout(() => {

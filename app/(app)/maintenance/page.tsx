@@ -203,12 +203,12 @@ export default function MaintenancePage() {
                             <Dialog open={recordToClose?.id === record.id} onOpenChange={(open) => !open && setRecordToClose(null)}>
                               <DialogTrigger
                                 render={
-                                  <Button variant="outline" size="sm" className="hover:text-emerald-500 hover:border-emerald-500/50 transition-colors" onClick={() => setRecordToClose(record)} />
+                                  <Button variant="outline" size="sm" className="hover:text-emerald-500 hover:border-emerald-500/50 transition-colors" onClick={() => setRecordToClose(record)}>
+                                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                                    Close Record
+                                  </Button>
                                 }
-                              >
-                                <CheckCircle2 className="w-4 h-4 mr-2" />
-                                Close Record
-                              </DialogTrigger>
+                              />
                               <DialogContent>
                                 <DialogHeader>
                                   <DialogTitle>Close Maintenance Record</DialogTitle>

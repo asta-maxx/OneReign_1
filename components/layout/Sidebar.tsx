@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Map, Car, Users, Route, Wrench, Receipt, BarChart, Settings, Truck } from "lucide-react";
+import { LayoutDashboard, Map, Car, Users, Route, Wrench, Receipt, BarChart, Settings, Truck, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const routes = [
@@ -98,8 +98,19 @@ export function Sidebar() {
             <p className="text-xs text-mute">admin@transitops.com</p>
           </div>
         </div>
-        {/* We keep ThemeToggle for now, user can decide later */}
-        <ThemeToggle />
+        <div className="flex flex-col gap-2">
+          <ThemeToggle />
+          <button
+            onClick={async () => {
+              await fetch("/api/auth/logout", { method: "POST" });
+              window.location.href = "/login";
+            }}
+            className="flex items-center justify-center p-2 text-mute hover:text-semantic-error transition-colors"
+            title="Log out"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
   );
