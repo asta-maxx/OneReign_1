@@ -120,8 +120,8 @@ export default function DriversPage() {
     <div className="p-8 space-y-8 max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Drivers & Safety Profiles</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="font-display text-5xl uppercase tracking-tight text-ink">Drivers & Safety Profiles</h1>
+          <p className="text-mute mt-1 uppercase tracking-widest text-xs font-semibold">
             Manage your workforce, monitor safety ratings, and communication.
           </p>
         </div>

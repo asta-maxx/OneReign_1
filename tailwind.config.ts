@@ -23,8 +23,6 @@ const config: Config = {
   			primary: {
   				DEFAULT: 'hsl(var(--primary) / <alpha-value>)',
   				foreground: 'hsl(var(--primary-foreground) / <alpha-value>)',
-          active: 'hsl(var(--primary-active) / <alpha-value>)',
-          glow: 'hsl(var(--primary-glow) / <alpha-value>)',
   			},
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary) / <alpha-value>)',
@@ -33,31 +31,36 @@ const config: Config = {
   			muted: {
   				DEFAULT: 'hsl(var(--muted) / <alpha-value>)',
   				foreground: 'hsl(var(--muted-foreground) / <alpha-value>)',
-          soft: 'hsl(var(--muted-soft) / <alpha-value>)',
   			},
   			accent: {
   				DEFAULT: 'hsl(var(--accent) / <alpha-value>)',
   				foreground: 'hsl(var(--accent-foreground) / <alpha-value>)',
-          cyan: 'hsl(var(--accent-cyan) / <alpha-value>)',
-          violet: 'hsl(var(--accent-violet) / <alpha-value>)',
   			},
         canvas: {
           DEFAULT: 'hsl(var(--canvas) / <alpha-value>)',
-          deep: 'hsl(var(--canvas-deep) / <alpha-value>)',
         },
-        surface: {
-          card: 'hsl(var(--surface-card) / <alpha-value>)',
-          elevated: 'hsl(var(--surface-card-elevated) / <alpha-value>)',
-          strong: 'hsl(var(--surface-strong) / <alpha-value>)',
-        },
+        'soft-cloud': 'hsl(var(--soft-cloud) / <alpha-value>)',
+        ink: 'hsl(var(--ink) / <alpha-value>)',
+        charcoal: 'hsl(var(--charcoal) / <alpha-value>)',
+        ash: 'hsl(var(--ash) / <alpha-value>)',
+        mute: 'hsl(var(--mute) / <alpha-value>)',
+        stone: 'hsl(var(--stone) / <alpha-value>)',
+        
         hairline: {
           DEFAULT: 'hsl(var(--hairline) / <alpha-value>)',
           soft: 'hsl(var(--hairline-soft) / <alpha-value>)',
-          strong: 'hsl(var(--hairline-strong) / <alpha-value>)',
         },
-        semantic: {
-          success: 'hsl(var(--semantic-success) / <alpha-value>)',
-          error: 'hsl(var(--semantic-error) / <alpha-value>)',
+        sale: {
+          DEFAULT: 'hsl(var(--sale) / <alpha-value>)',
+          deep: 'hsl(var(--sale-deep) / <alpha-value>)',
+        },
+        success: {
+          DEFAULT: 'hsl(var(--success) / <alpha-value>)',
+          bright: 'hsl(var(--success-bright) / <alpha-value>)',
+        },
+        info: {
+          DEFAULT: 'hsl(var(--info) / <alpha-value>)',
+          deep: 'hsl(var(--info-deep) / <alpha-value>)',
         },
   			destructive: {
   				DEFAULT: 'hsl(var(--destructive) / <alpha-value>)',
@@ -76,15 +79,16 @@ const config: Config = {
   		},
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "ui-sans-serif", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "monospace"],
       },
   		borderRadius: {
         none: '0px',
         xs: '4px',
-        sm: '6px',
-        md: '8px',
-        lg: '12px',
-        xl: '16px',
+        sm: '18px',
+        md: '24px',
+        lg: '30px',
+        xl: '36px',
         pill: '9999px',
         full: '9999px',
   		}

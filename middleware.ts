@@ -14,7 +14,7 @@ import type { AuthRole } from "@/lib/auth/types";
  */
 
 const COOKIE_NAME = process.env.AUTH_COOKIE_NAME ?? "auth_token";
-const PUBLIC_PAGES = ["/login"];
+const PUBLIC_PAGES = ["/login", "/register"];
 const PUBLIC_API_PREFIXES = ["/api/auth"];
 
 function isRole(v: unknown): v is AuthRole {

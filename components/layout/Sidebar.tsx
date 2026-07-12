@@ -59,16 +59,16 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="flex flex-col w-64 bg-canvas border-r border-hairline-soft min-h-screen p-4">
-      <div className="flex items-center gap-3 px-2 py-4 mb-8">
+    <div className="flex flex-col w-64 bg-canvas border-r border-hairline min-h-screen p-6">
+      <div className="flex items-center gap-3 mb-10">
         <div className="p-1">
-          <Truck className="w-5 h-5 text-body-strong" />
+          <Truck className="w-6 h-6 text-ink" />
         </div>
         <div>
-          <h1 className="text-lg font-semibold tracking-tight text-body-strong leading-none">TransitOps</h1>
+          <h1 className="text-2xl font-display uppercase tracking-tight text-ink leading-none">TransitOps</h1>
         </div>
       </div>
-      <div className="flex-1 space-y-1">
+      <div className="flex-1 space-y-2">
         {routes.map((route) => {
           const isActive = pathname === route.href || (pathname.startsWith(route.href) && route.href !== "/");
           return (
@@ -76,28 +76,29 @@ export function Sidebar() {
               key={route.href}
               href={route.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-all group",
+                "flex items-center gap-4 px-3 py-3 rounded-none text-xs uppercase tracking-widest font-semibold transition-colors group",
                 isActive 
-                  ? "bg-surface-elevated text-body-strong font-medium" 
-                  : "text-muted hover:bg-surface-elevated/50 hover:text-body-strong"
+                  ? "bg-ink text-canvas" 
+                  : "text-mute hover:bg-soft-cloud hover:text-ink"
               )}
             >
-              <route.icon className={cn("w-4 h-4", isActive ? "text-body-strong" : "text-muted group-hover:text-body-strong")} />
+              <route.icon className={cn("w-4 h-4", isActive ? "text-canvas" : "text-mute group-hover:text-ink")} />
               {route.label}
             </Link>
           );
         })}
       </div>
-      <div className="pt-4 border-t border-hairline-soft mt-auto flex items-center justify-between">
-        <div className="flex items-center gap-3 px-2 py-2">
-          <div className="w-8 h-8 rounded-full bg-surface-elevated flex items-center justify-center text-xs font-medium text-muted">
+      <div className="pt-6 mt-auto flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-ink flex items-center justify-center text-xs font-semibold text-canvas">
             TO
           </div>
           <div>
-            <p className="text-sm font-medium text-body-strong">Fleet Admin</p>
-            <p className="text-xs text-muted">admin@transitops.com</p>
+            <p className="text-xs uppercase tracking-widest font-semibold text-ink">Fleet Admin</p>
+            <p className="text-xs text-mute">admin@transitops.com</p>
           </div>
         </div>
+        {/* We keep ThemeToggle for now, user can decide later */}
         <ThemeToggle />
       </div>
     </div>

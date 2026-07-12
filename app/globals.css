@@ -4,113 +4,113 @@
 
 @layer base {
   :root {
-    /* LIGHT MODE */
+    /* NIKE LIGHT MODE - Default */
     --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
+    --foreground: 0 0% 7%; /* #111111 */
     
-    --canvas: 0 0% 100%;
-    --canvas-deep: 0 0% 97%;
-    --surface-card: 0 0% 100%;
-    --surface-card-elevated: 0 0% 94%;
-    --surface-strong: 0 0% 90%;
+    --canvas: 0 0% 100%; /* #ffffff */
+    --soft-cloud: 0 0% 96%; /* #f5f5f5 */
     
-    --hairline: 0 0% 90%;
-    --hairline-soft: 0 0% 94%;
-    --hairline-strong: 0 0% 83%;
+    --hairline: 0 0% 79%; /* #cacacb */
+    --hairline-soft: 0 0% 90%; /* #e5e5e5 */
     
-    --primary: 237 100% 40%;
-    --primary-foreground: 0 0% 100%;
-    --primary-active: 237 100% 33%;
-    --primary-glow: 237 100% 55%;
+    --ink: 0 0% 7%; /* #111111 */
+    --charcoal: 240 2% 23%; /* #39393b */
+    --ash: 240 1% 30%; /* #4b4b4d */
+    --mute: 240 1% 45%; /* #707072 */
+    --stone: 240 1% 63%; /* #9e9ea0 */
     
-    --accent-cyan: 190 100% 50%;
-    --accent-violet: 262 83% 58%;
+    --sale: 358 100% 41%; /* #d30005 */
+    --sale-deep: 4 100% 24%; /* #780700 */
     
-    --ink: 0 0% 0%;
-    --body: 0 0% 29%;
-    --body-strong: 0 0% 0%;
-    --muted: 0 0% 45%;
-    --muted-soft: 0 0% 60%;
+    --success: 154 100% 25%; /* #007d48 */
+    --success-bright: 142 69% 39%; /* #1eaa52 */
     
-    --semantic-success: 147 64% 51%;
-    --semantic-error: 0 100% 65%;
-    
+    --info: 227 100% 53%; /* #1151ff */
+    --info-deep: 226 100% 45%; /* #0034e3 */
+
     /* Shadcn compatibility aliases for light mode */
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
+    --card-foreground: 0 0% 7%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
-    --secondary: 0 0% 94%;
-    --secondary-foreground: 0 0% 0%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 0 0% 94%;
-    --accent-foreground: 0 0% 0%;
-    --destructive: 0 100% 65%;
+    --popover-foreground: 0 0% 7%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 7%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 240 1% 45%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 7%;
+    --destructive: 358 100% 41%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 237 100% 40%;
+    --border: 0 0% 79%;
+    --input: 0 0% 79%;
+    --ring: 0 0% 7%;
     
-    --chart-1: 221.2 83.2% 53.3%;
-    --chart-2: 212 92% 44%;
-    --chart-3: 199 89% 48%;
-    --chart-4: 175 93% 38%;
-    --chart-5: 160 84% 39%;
+    /* Primary maps to Ink */
+    --primary: 0 0% 7%;
+    --primary-foreground: 0 0% 100%;
+    
+    --radius: 0px; /* Base radius 0 for Nike flat look */
+    
+    --chart-1: 0 0% 7%;
+    --chart-2: 240 1% 45%;
+    --chart-3: 0 0% 79%;
+    --chart-4: 358 100% 41%;
+    --chart-5: 154 100% 25%;
   }
 
   .dark {
-    /* COMPOSIO DARK MODE */
-    --background: 0 0% 6%; /* #0f0f0f */
-    --foreground: 0 0% 100%;
+    /* NIKE DARK MODE (Strict Inverse) */
+    --background: 0 0% 7%; /* #111111 */
+    --foreground: 0 0% 100%; /* #ffffff */
     
-    --canvas: 0 0% 6%;
-    --canvas-deep: 0 0% 0%; /* #000000 */
-    --surface-card: 0 0% 9.4%; /* #181818 */
-    --surface-card-elevated: 0 0% 13.3%; /* #222222 */
-    --surface-strong: 0 0% 16.5%; /* #2a2a2a */
+    --canvas: 0 0% 7%; /* #111111 */
+    --soft-cloud: 240 2% 23%; /* #39393b */
     
-    --hairline: 0 0% 13.3%;
-    --hairline-soft: 0 0% 10.2%;
-    --hairline-strong: 0 0% 20%;
+    --hairline: 240 1% 30%; /* #4b4b4d */
+    --hairline-soft: 240 2% 23%; /* #39393b */
     
-    --primary: 237 100% 40%; /* #0007cd */
-    --primary-foreground: 0 0% 100%;
-    --primary-active: 237 100% 33%;
-    --primary-glow: 237 100% 55%;
+    --ink: 0 0% 100%; /* #ffffff */
+    --charcoal: 0 0% 79%; /* #cacacb */
+    --ash: 240 1% 63%; /* #9e9ea0 */
+    --mute: 240 1% 45%; /* #707072 */
+    --stone: 240 1% 30%; /* #4b4b4d */
     
-    --accent-cyan: 190 100% 50%;
-    --accent-violet: 262 83% 58%;
+    --sale: 358 100% 41%; /* #d30005 */
+    --sale-deep: 358 100% 41%;
     
-    --ink: 0 0% 100%;
-    --body: 0 0% 66%; /* #a8a8a8 */
-    --body-strong: 0 0% 100%;
-    --muted: 0 0% 53.3%; /* #888888 */
-    --muted-soft: 0 0% 40%; /* #666666 */
+    --success: 142 69% 39%; /* #1eaa52 */
+    --success-bright: 154 100% 25%; 
     
-    --semantic-success: 147 64% 51%;
-    --semantic-error: 0 100% 65%;
-    
+    --info: 227 100% 53%;
+    --info-deep: 227 100% 53%;
+
     /* Shadcn compatibility aliases for dark mode */
-    --card: 0 0% 9.4%;
+    --card: 0 0% 7%;
     --card-foreground: 0 0% 100%;
-    --popover: 0 0% 9.4%;
+    --popover: 0 0% 7%;
     --popover-foreground: 0 0% 100%;
-    --secondary: 0 0% 13.3%;
+    --secondary: 240 2% 23%;
     --secondary-foreground: 0 0% 100%;
-    --muted-foreground: 0 0% 66%;
-    --accent: 0 0% 13.3%;
+    --muted: 240 2% 23%;
+    --muted-foreground: 0 0% 79%;
+    --accent: 240 2% 23%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 100% 65%;
+    --destructive: 358 100% 41%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 13.3%;
-    --input: 0 0% 13.3%;
-    --ring: 237 100% 55%;
+    --border: 240 1% 30%;
+    --input: 240 1% 30%;
+    --ring: 0 0% 100%;
     
-    --chart-1: 221.2 83.2% 53.3%;
-    --chart-2: 212 92% 44%;
-    --chart-3: 199 89% 48%;
-    --chart-4: 175 93% 38%;
-    --chart-5: 160 84% 39%;
+    /* Primary maps to Ink */
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 7%;
+    
+    --chart-1: 0 0% 100%;
+    --chart-2: 0 0% 79%;
+    --chart-3: 240 1% 45%;
+    --chart-4: 358 100% 41%;
+    --chart-5: 142 69% 39%;
   }
 }
 

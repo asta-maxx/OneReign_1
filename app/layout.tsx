@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, Bebas_Neue } from "next/font/google";
 import { cn } from "@/lib/utils";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
+const bebas = Bebas_Neue({ weight: "400", subsets: ["latin"], variable: "--font-display" });
 
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -20,12 +20,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("font-sans tracking-tight", inter.variable, jetbrainsMono.variable)} suppressHydrationWarning>
-      <body className="antialiased flex min-h-screen bg-background">
+    <html lang="en" className={cn("font-sans tracking-tight", inter.variable, bebas.variable)} suppressHydrationWarning>
+      <body className="antialiased flex min-h-screen bg-canvas text-ink">
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
-          enableSystem
+          defaultTheme="light"
+          enableSystem={false}
           disableTransitionOnChange
         >
           {children}

@@ -4,17 +4,17 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button inline-flex shrink-0 items-center justify-center rounded-full border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary-active",
+        default: "bg-ink text-canvas hover:opacity-80",
         outline:
-          "border-hairline-strong bg-transparent hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground",
+          "border-hairline-strong bg-transparent hover:bg-soft-cloud hover:text-ink aria-expanded:bg-soft-cloud aria-expanded:text-ink",
         secondary:
-          "bg-surface-elevated text-foreground hover:bg-surface-strong aria-expanded:bg-surface-elevated aria-expanded:text-foreground",
+          "bg-soft-cloud text-ink hover:bg-hairline aria-expanded:bg-soft-cloud aria-expanded:text-ink",
         ghost:
-          "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
+          "hover:bg-soft-cloud hover:text-ink aria-expanded:bg-soft-cloud aria-expanded:text-ink dark:hover:bg-muted/50",
         destructive:
           "bg-semantic-error/10 text-semantic-error hover:bg-semantic-error/20 focus-visible:border-semantic-error/40 focus-visible:ring-semantic-error/20 dark:bg-semantic-error/20 dark:hover:bg-semantic-error/30 dark:focus-visible:ring-semantic-error/40",
         link: "text-primary underline-offset-4 hover:underline",

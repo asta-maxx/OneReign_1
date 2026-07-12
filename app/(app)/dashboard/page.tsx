@@ -37,9 +37,9 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Top row - Main KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {loading || !kpis ? (
           Array.from({ length: 3 }).map((_, i) => <SkeletonKpiCard key={i} />)
         ) : (
@@ -97,49 +97,49 @@ export default function DashboardPage() {
       </div>
 
       {/* Third row - Lists */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-8">
         {/* Recent Alerts */}
-        <Card>
+        <Card className="bg-canvas">
           <CardHeader>
-            <CardTitle className="text-lg font-medium text-body-strong">Recent Alerts</CardTitle>
+            <CardTitle className="font-display text-2xl uppercase tracking-widest text-ink">Recent Alerts</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Hardcoded sample data for now */}
-            <div className="flex items-start gap-3 p-3 bg-semantic-danger/10 text-semantic-danger rounded-md border border-semantic-danger/20">
-              <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 p-4 bg-soft-cloud text-ink border-l-4 border-sale">
+              <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-sale" />
               <div>
-                <p className="text-sm font-medium">Vehicle V-104 Engine Light</p>
-                <p className="text-xs opacity-80 mt-1">Reported 10 mins ago</p>
+                <p className="text-sm font-semibold uppercase tracking-widest">Vehicle V-104 Engine Light</p>
+                <p className="text-xs text-mute mt-1 uppercase tracking-widest">Reported 10 mins ago</p>
               </div>
             </div>
-            <div className="flex items-start gap-3 p-3 bg-semantic-warning/10 text-semantic-warning rounded-md border border-semantic-warning/20">
-              <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 p-4 bg-soft-cloud text-ink border-l-4 border-sale">
+              <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-sale" />
               <div>
-                <p className="text-sm font-medium">Driver D-02 Speeding Violation</p>
-                <p className="text-xs opacity-80 mt-1">Reported 45 mins ago</p>
+                <p className="text-sm font-semibold uppercase tracking-widest">Driver D-02 Speeding</p>
+                <p className="text-xs text-mute mt-1 uppercase tracking-widest">Reported 45 mins ago</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Fleet Status */}
-        <Card>
+        <Card className="bg-canvas">
           <CardHeader>
-            <CardTitle className="text-lg font-medium text-body-strong">Fleet Status</CardTitle>
+            <CardTitle className="font-display text-2xl uppercase tracking-widest text-ink">Fleet Status</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted">V-101 (Sprinter Van)</span>
-                <span className="text-xs px-2 py-1 bg-semantic-success/20 text-semantic-success rounded-full font-medium">In Transit</span>
+              <div className="flex items-center justify-between border-b border-hairline pb-4">
+                <span className="text-sm font-medium text-ink uppercase tracking-widest">V-101 (Sprinter Van)</span>
+                <span className="text-xs px-3 py-1 bg-success/10 text-success rounded-full font-semibold uppercase tracking-widest">In Transit</span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted">V-102 (Box Truck)</span>
-                <span className="text-xs px-2 py-1 bg-canvas-deep text-muted rounded-full font-medium">Idle</span>
+              <div className="flex items-center justify-between border-b border-hairline pb-4">
+                <span className="text-sm font-medium text-ink uppercase tracking-widest">V-102 (Box Truck)</span>
+                <span className="text-xs px-3 py-1 bg-soft-cloud text-mute rounded-full font-semibold uppercase tracking-widest">Idle</span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted">V-103 (Sedan)</span>
-                <span className="text-xs px-2 py-1 bg-semantic-warning/20 text-semantic-warning rounded-full font-medium">Maintenance</span>
+              <div className="flex items-center justify-between border-b border-hairline pb-4">
+                <span className="text-sm font-medium text-ink uppercase tracking-widest">V-103 (Sedan)</span>
+                <span className="text-xs px-3 py-1 bg-sale/10 text-sale rounded-full font-semibold uppercase tracking-widest">Maintenance</span>
               </div>
             </div>
           </CardContent>

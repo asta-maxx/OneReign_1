@@ -14,19 +14,20 @@ export function TopHeader() {
   const title = currentSegment.charAt(0).toUpperCase() + currentSegment.slice(1);
 
   return (
-    <header className="h-16 border-b border-hairline-soft bg-canvas px-6 flex items-center justify-between shrink-0">
-      <div className="flex items-center gap-2 text-sm text-muted">
-        <span>TransitOps</span>
+    <header className="h-16 border-b border-hairline bg-canvas px-6 flex items-center justify-between shrink-0">
+      <div className="flex items-center gap-3 text-sm text-mute">
+        <span className="uppercase tracking-widest text-xs font-semibold">TransitOps</span>
         <ChevronRight className="w-4 h-4" />
-        <span className="font-medium text-body-strong capitalize">{title}</span>
+        <span className="font-display text-3xl uppercase tracking-tight text-ink leading-none mt-1">{title}</span>
       </div>
       
       <div className="flex items-center gap-4">
+        {/* If ThemeToggle exists in this project, it might be at @/components/ThemeToggle, not @/components/theme-toggle, since Sidebar uses ThemeToggle. I'll just use the imported one. */}
         <ThemeToggle />
-        <Button variant="ghost" size="icon" className="rounded-full text-muted hover:text-body-strong">
+        <Button variant="ghost" size="icon" className="rounded-full text-mute hover:text-ink hover:bg-soft-cloud">
           <Bell className="w-5 h-5" />
         </Button>
-        <Button variant="ghost" size="icon" className="rounded-full bg-surface-elevated text-body-strong">
+        <Button variant="ghost" size="icon" className="rounded-full bg-ink text-canvas hover:bg-ink/80 hover:text-canvas">
           <User className="w-5 h-5" />
         </Button>
       </div>
