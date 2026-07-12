@@ -5,6 +5,7 @@ import { verifyPassword } from "@/lib/auth/password";
 import { signJwt } from "@/lib/auth/jwt";
 import { setAuthCookie } from "@/lib/auth/cookies";
 import { validateEmail, validatePassword } from "@/lib/auth/validation";
+import type { AuthRole } from "@/lib/auth/types";
 
 /**
  * POST /api/auth/login
@@ -41,7 +42,7 @@ export async function POST(req: NextRequest) {
     const token = signJwt({
       userId: user.id,
       email: user.email,
-      role: user.role,
+      role: user.role as AuthRole,
     });
 
     setAuthCookie(token);
