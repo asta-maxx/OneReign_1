@@ -60,6 +60,7 @@ model Trip {
   driverId    String
   status      String    @default("Draft") // "Draft" | "Dispatched" | "Completed" | "Cancelled"
   distance    Float     @default(0) // distance for this trip (used for fuel efficiency once Completed)
+  revenue     Float     @default(0) // fare/earnings for this trip (used for ROI once Completed)
   cargoWeight Float?
   region      String?
   createdAt   DateTime  @default(now())

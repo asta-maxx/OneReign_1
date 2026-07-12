@@ -40,9 +40,9 @@ async function main() {
   // Completed trips give getFuelEfficiency() a non-zero distance to divide by.
   await prisma.trip.createMany({
     data: [
-      { id: "t1", vehicleId: "v1", driverId: driver.id, status: "Completed", distance: 620, completedAt: new Date(Date.now() - DAY * 3) },
-      { id: "t2", vehicleId: "v2", driverId: driver.id, status: "Completed", distance: 1500, completedAt: new Date(Date.now() - DAY * 1) },
-      { id: "t3", vehicleId: "v2", driverId: driver.id, status: "Dispatched", distance: 0 },
+      { id: "t1", vehicleId: "v1", driverId: driver.id, status: "Completed", distance: 620, revenue: 1200, completedAt: new Date(Date.now() - DAY * 3) },
+      { id: "t2", vehicleId: "v2", driverId: driver.id, status: "Completed", distance: 1500, revenue: 3000, completedAt: new Date(Date.now() - DAY * 1) },
+      { id: "t3", vehicleId: "v2", driverId: driver.id, status: "Dispatched", distance: 0, revenue: 0 },
     ],
   });
 
