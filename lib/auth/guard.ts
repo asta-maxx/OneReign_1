@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getAuthTokenFromCookies } from "@/lib/auth/cookies";
 import { verifyJwt } from "@/lib/auth/jwt";
 import type { AuthRole, JwtPayload } from "@/lib/auth/types";
+import { can, type Action, type Resource } from "@/lib/auth/rbac";
 
 /**
  * Server-side auth guards for route handlers and server components.
@@ -41,6 +42,21 @@ export function requireRole(...roles: AuthRole[]): GuardResult {
     return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
   }
   if (!roles.includes(user.role)) {
+    return { error: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
+  }
+  return { user };
+}
+
+/**
+ * Require permission for a resource/action against the RBAC matrix
+ * (lib/auth/rbac.ts). Route-level defense-in-depth backing the middleware gate.
+ */
+export function requirePermission(resource: Resource, action: Action): GuardResult {
+  const user = getSessionUser();
+  if (!user) {
+    return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
+  }
+  if (!can(user.role, resource, action)) {
     return { error: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
   }
   return { user };

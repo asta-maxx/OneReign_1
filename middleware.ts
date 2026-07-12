@@ -1,43 +1,80 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jwtVerify } from "jose";
+import { can, resourceForPath, type Action } from "@/lib/auth/rbac";
+import type { AuthRole } from "@/lib/auth/types";
 
 /**
- * Auth gate. Runs on the Edge runtime, so it only checks that the auth cookie is
- * PRESENT (JWT signature/expiry + role are verified server-side via
- * lib/auth/guard.ts in route handlers). This satisfies "only authenticated users
- * may access the application": unauthenticated page requests are redirected to
- * /login, and unauthenticated /api requests get 401.
+ * Central auth + RBAC gate (runs on every page/API request).
+ *
+ * Unlike a cookie-presence check, this VERIFIES the JWT signature/expiry using
+ * `jose` (Edge-compatible, unlike jsonwebtoken), then enforces the RBAC matrix in
+ * lib/auth/rbac.ts:
+ *   - unauthenticated  → /login (pages) or 401 (api)
+ *   - authenticated but not permitted → /dashboard?denied=… (pages) or 403 (api)
  */
 
 const COOKIE_NAME = process.env.AUTH_COOKIE_NAME ?? "auth_token";
-
-// Routes reachable without authentication.
 const PUBLIC_PAGES = ["/login"];
 const PUBLIC_API_PREFIXES = ["/api/auth"];
 
-export function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-  const hasToken = Boolean(req.cookies.get(COOKIE_NAME)?.value);
+function isRole(v: unknown): v is AuthRole {
+  return (
+    v === "Fleet Manager" ||
+    v === "Driver" ||
+    v === "Safety Officer" ||
+    v === "Financial Analyst"
+  );
+}
 
-  if (pathname.startsWith("/api")) {
-    if (PUBLIC_API_PREFIXES.some((p) => pathname.startsWith(p)) || hasToken) {
-      return NextResponse.next();
-    }
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+async function roleFromToken(token: string): Promise<AuthRole | null> {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) return null;
+  try {
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
+    return isRole(payload.role) ? payload.role : null;
+  } catch {
+    return null; // bad signature / expired
+  }
+}
+
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  const isApi = pathname.startsWith("/api");
+  const isPublic =
+    PUBLIC_API_PREFIXES.some((p) => pathname.startsWith(p)) ||
+    PUBLIC_PAGES.some((p) => pathname === p || pathname.startsWith(p + "/"));
+  if (isPublic) return NextResponse.next();
+
+  const token = req.cookies.get(COOKIE_NAME)?.value;
+  const role = token ? await roleFromToken(token) : null;
+
+  // 1) Authentication
+  if (!role) {
+    if (isApi) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const url = req.nextUrl.clone();
+    url.pathname = "/login";
+    url.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(url);
   }
 
-  const isPublicPage = PUBLIC_PAGES.some(
-    (p) => pathname === p || pathname.startsWith(p + "/")
-  );
-  if (isPublicPage || hasToken) return NextResponse.next();
+  // 2) Authorization (RBAC)
+  const resource = resourceForPath(pathname);
+  if (resource) {
+    const action: Action = req.method === "GET" ? "read" : "write";
+    if (!can(role, resource, action)) {
+      if (isApi) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      const url = req.nextUrl.clone();
+      url.pathname = "/dashboard";
+      url.searchParams.set("denied", resource);
+      return NextResponse.redirect(url);
+    }
+  }
 
-  const loginUrl = req.nextUrl.clone();
-  loginUrl.pathname = "/login";
-  loginUrl.searchParams.set("redirect", pathname);
-  return NextResponse.redirect(loginUrl);
+  return NextResponse.next();
 }
 
 export const config = {
-  // Run on everything except Next internals and static asset files.
   matcher: [
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf)$).*)",
   ],
